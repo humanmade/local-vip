@@ -14,8 +14,7 @@
 		"composer-plugin-api": "^1.1"
 	},
 	"extra": {
-		"class": "Altis\\Local_Server\\Composer\\Plugin",
-		"altis": {}
+		"class": "Altis\\Local_Server\\Composer\\Plugin"
 	},
 	"autoload": {
 		"classmap": [

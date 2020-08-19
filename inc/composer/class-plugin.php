@@ -8,6 +8,7 @@
 namespace Altis\Local_Server\Composer;
 
 use Composer\Composer;
+use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\Capable;
 use Composer\Plugin\PluginInterface;
@@ -17,7 +18,7 @@ use Composer\Plugin\PluginInterface;
  *
  * @package altis/local-server
  */
-class Plugin implements PluginInterface, Capable {
+class Plugin implements PluginInterface, Capable, EventSubscriberInterface {
 	/**
 	 * Plugin activation callback.
 	 *
