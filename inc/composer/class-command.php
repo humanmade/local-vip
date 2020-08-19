@@ -64,8 +64,6 @@ Database commands:
 	db info                       Prints out Database connection details
 View the logs
 	logs <service>                <service> can be php, nginx, db, s3, elasticsearch, xray
-Import files from content/uploads directly to s3:
-	import-uploads                Copies files from `content/uploads` to s3
 EOT
 			)
 			->addOption( 'xdebug' );
@@ -199,7 +197,7 @@ EOT
 			'options' => [
 				'core',
 				'is-installed',
-				'--quiet',
+				// '--quiet',
 			],
 		] ), $output ) === 0;
 
@@ -209,13 +207,13 @@ EOT
 				'options' => [
 					'core',
 					'multisite-install',
-					'--title=Altis',
+					'--title=VIP Project',
 					'--admin_user=admin',
 					'--admin_password=password',
-					'--admin_email=no-reply@altis.dev',
+					'--admin_email=no-reply@' . $this->get_project_subdomain() . '.local',
 					'--skip-email',
 					'--skip-config',
-					'--quiet',
+					// '--quiet',
 				],
 			] ), $output );
 
@@ -576,7 +574,7 @@ EOT;
 	 */
 	protected function import_uploads() {
 		return $this->minio_client( sprintf(
-			'mirror --exclude ".*" /content local/s3-%s',
+			'mirror --exclude ".*" /wp-content local/s3-%s',
 			$this->get_project_subdomain()
 		) );
 	}
@@ -595,7 +593,7 @@ EOT;
 			'docker run ' .
 				'-e COLUMNS=%1%d -e LINES=%2$d ' .
 				'--volume=%3$s/vendor/altis/local-server/docker/minio.json:/root/.mc/config.json ' .
-				'--volume=%3$s/content/uploads:/content/uploads:delegated ' .
+				'--volume=%3$s/wp-content/uploads:/wp-content/uploads:delegated ' .
 				'--network=%4$s_default ' .
 				'minio/mc:RELEASE.2020-03-14T01-23-37Z %5$s',
 			$columns,
