@@ -1,1 +1,5 @@
 node_modules
+
+# In case an install is run locally
+composer.lock
+vendor
