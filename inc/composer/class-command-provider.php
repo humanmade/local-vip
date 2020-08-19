@@ -2,7 +2,7 @@
 /**
  * Local Server Composer Command Provider.
  *
- * @package altis/local-server
+ * @package humanmade/local-vip
  */
 
 namespace Altis\Local_Server\Composer;
@@ -12,7 +12,7 @@ use Composer\Plugin\Capability\CommandProvider as CommandProviderCapability;
 /**
  * Altis Local Server Composer Command Provider.
  *
- * @package altis/local-server
+ * @package humanmade/local-vip
  */
 class Command_Provider implements CommandProviderCapability {
 	/**

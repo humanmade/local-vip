@@ -4,7 +4,7 @@
  *
  * phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
  *
- * @package altis/local-server
+ * @package humanmade/local-vip
  */
 
 namespace Local_Server_VIP\Composer;
@@ -20,7 +20,7 @@ use Symfony\Component\Process\Process;
 /**
  * Local Server for VIP Composer Command.
  *
- * @package altis/local-server
+ * @package humanmade/local-vip
  */
 class Command extends BaseCommand {
 
@@ -86,7 +86,7 @@ EOT
 	private function get_base_command_prefix() : string {
 		return sprintf(
 			'cd %s; VOLUME=%s COMPOSE_PROJECT_NAME=%s',
-			'vendor/altis/local-server/docker',
+			'vendor/humanmade/local-vip/docker',
 			escapeshellarg( getcwd() ),
 			$this->get_project_subdomain()
 		);
@@ -157,7 +157,7 @@ EOT
 	protected function start( InputInterface $input, OutputInterface $output ) {
 		$output->writeln( '<info>Starting...</>' );
 
-		$proxy = new Process( 'docker-compose -f proxy.yml up -d', 'vendor/altis/local-server/docker' );
+		$proxy = new Process( 'docker-compose -f proxy.yml up -d', 'vendor/humanmade/local-vip/docker' );
 		$proxy->setTimeout( 0 );
 		$proxy->setTty( true );
 		$proxy_failed = $proxy->run( function ( $type, $buffer ) {
@@ -177,7 +177,7 @@ EOT
 			}
 		}
 
-		$compose = new Process( 'docker-compose up -d', 'vendor/altis/local-server/docker', $env );
+		$compose = new Process( 'docker-compose up -d', 'vendor/humanmade/local-vip/docker', $env );
 		$compose->setTty( true );
 		$compose->setTimeout( 0 );
 		$failed = $compose->run( function ( $type, $buffer ) {
@@ -244,10 +244,10 @@ EOT
 	protected function stop( InputInterface $input, OutputInterface $output ) {
 		$output->writeln( '<info>Stopping...</>' );
 
-		$proxy = new Process( 'docker-compose stop', 'vendor/altis/local-server/docker', $this->get_env() );
+		$proxy = new Process( 'docker-compose stop', 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		$proxy->run();
 
-		$compose = new Process( 'docker-compose stop', 'vendor/altis/local-server/docker', $this->get_env() );
+		$compose = new Process( 'docker-compose stop', 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		$return_val = $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
 		} );
@@ -277,10 +277,10 @@ EOT
 
 		$output->writeln( '<error>Destroying...</>' );
 
-		$proxy = new Process( 'docker-compose down -v', 'vendor/altis/local-server/docker', $this->get_env() );
+		$proxy = new Process( 'docker-compose down -v', 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		$proxy->run();
 
-		$compose = new Process( 'docker-compose down -v', 'vendor/altis/local-server/docker', $this->get_env() );
+		$compose = new Process( 'docker-compose down -v', 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		$return_val = $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
 		} );
@@ -304,7 +304,7 @@ EOT
 	protected function restart( InputInterface $input, OutputInterface $output ) {
 		$output->writeln( '<info>Restarting...</>' );
 
-		$proxy = new Process( 'docker-compose restart', 'vendor/altis/local-server/docker', $this->get_env() );
+		$proxy = new Process( 'docker-compose restart', 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		$proxy->run();
 
 		$options = $input->getArgument( 'options' );
@@ -313,7 +313,7 @@ EOT
 		} else {
 			$service = '';
 		}
-		$compose = new Process( "docker-compose restart $service", 'vendor/altis/local-server/docker', $this->get_env() );
+		$compose = new Process( "docker-compose restart $service", 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		$return_val = $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
 		} );
@@ -399,7 +399,7 @@ EOT
 	 * @return int
 	 */
 	protected function status( InputInterface $input, OutputInterface $output ) {
-		$compose = new Process( 'docker-compose ps', 'vendor/altis/local-server/docker', $this->get_env() );
+		$compose = new Process( 'docker-compose ps', 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		return $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
 		} );
@@ -414,7 +414,7 @@ EOT
 	 */
 	protected function logs( InputInterface $input, OutputInterface $output ) {
 		$log = $input->getArgument( 'options' )[0];
-		$compose = new Process( 'docker-compose logs --tail=100 -f ' . $log, 'vendor/altis/local-server/docker', $this->get_env() );
+		$compose = new Process( 'docker-compose logs --tail=100 -f ' . $log, 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		$compose->setTimeout( 0 );
 		return $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
@@ -592,7 +592,7 @@ EOT;
 		$base_command = sprintf(
 			'docker run ' .
 				'-e COLUMNS=%1%d -e LINES=%2$d ' .
-				'--volume=%3$s/vendor/altis/local-server/docker/minio.json:/root/.mc/config.json ' .
+				'--volume=%3$s/vendor/humanmade/local-vip/docker/minio.json:/root/.mc/config.json ' .
 				'--volume=%3$s/wp-content/uploads:/wp-content/uploads:delegated ' .
 				'--network=%4$s_default ' .
 				'minio/mc:RELEASE.2020-03-14T01-23-37Z %5$s',

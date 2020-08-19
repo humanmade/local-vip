@@ -2,7 +2,7 @@
 /**
  * Local Server for WordPress VIP Projects.
  *
- * @package altis/local-server
+ * @package humanmade/local-vip
  */
 
 namespace Local_Server_VIP;

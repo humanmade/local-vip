@@ -1,5 +1,5 @@
 {
-	"name": "altis/local-server",
+	"name": "humanmade/local-vip",
 	"description": "Local Server module for WordPress VIP projects",
 	"type": "composer-plugin",
 	"license": "GPL-2.0-or-later",

@@ -7,7 +7,7 @@
  *
  * This module will only then enable it's self if the architecture is local-server.
  *
- * @package altis/local-server
+ * @package humanmade/local-vip
  */
 
 /* phpcs:disable PSR1.Files.SideEffects */

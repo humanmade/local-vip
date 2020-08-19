@@ -2,7 +2,7 @@
 /**
  * Local Server Composer Plugin.
  *
- * @package altis/local-server
+ * @package humanmade/local-vip
  */
 
 namespace Altis\Local_Server\Composer;
@@ -16,7 +16,7 @@ use Composer\Plugin\PluginInterface;
 /**
  * Altis Local Server Composer Plugin.
  *
- * @package altis/local-server
+ * @package humanmade/local-vip
  */
 class Plugin implements PluginInterface, Capable, EventSubscriberInterface {
 	/**
