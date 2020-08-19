@@ -122,8 +122,6 @@ EOT
 			return $this->logs( $input, $output );
 		} elseif ( $subcommand === 'shell' ) {
 			return $this->shell( $input, $output );
-		} elseif ( $subcommand === 'import-uploads' ) {
-			return $this->import_uploads( $input, $output );
 		} elseif ( $subcommand === null ) {
 			// Default to start command.
 			return $this->start( $input, $output );
@@ -565,18 +563,6 @@ EOT;
 				'PORT' => $ports_matches[2],
 			]
 		);
-	}
-
-	/**
-	 * Import uploads from the host machine to the S3 container.
-	 *
-	 * @return int
-	 */
-	protected function import_uploads() {
-		return $this->minio_client( sprintf(
-			'mirror --exclude ".*" /wp-content local/s3-%s',
-			$this->get_project_subdomain()
-		) );
 	}
 
 	/**

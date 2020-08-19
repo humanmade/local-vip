@@ -14,7 +14,6 @@ my-site_nginx_1           nginx -g daemon off;             Up       80/tcp, 0.0.
 my-site_php_1             /docker-entrypoint.sh php-fpm    Up       0.0.0.0:32822->9000/tcp
 my-site_redis_1           docker-entrypoint.sh redis ...   Up       0.0.0.0:32820->6379/tcp
 my-site_s3_1              fakes3 server --root . --p ...   Up       0.0.0.0:32819->8000/tcp
-my-site_tachyon_1         node server.js --debug           Up       0.0.0.0:8081->8080/tcp
 my-site_xray_1            /usr/bin/xray -b 0.0.0.0:2000    Up       0.0.0.0:32817->2000/tcp, 2000/udp
 ```
 

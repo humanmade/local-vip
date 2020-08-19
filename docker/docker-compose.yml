@@ -55,7 +55,6 @@ x-php: &php
     S3_UPLOADS_KEY: admin
     S3_UPLOADS_SECRET: password
     S3_UPLOADS_REGION: us-east-1
-    TACHYON_URL: https://${COMPOSE_PROJECT_NAME:-default}.altis.dev/tachyon
     PHP_SENDMAIL_PATH: /usr/sbin/sendmail -t -i -S mailhog:1025
     ALTIS_ANALYTICS_PINPOINT_ENDPOINT: https://pinpoint-${COMPOSE_PROJECT_NAME:-default}.altis.dev
     ALTIS_ANALYTICS_COGNITO_ENDPOINT: https://cognito-${COMPOSE_PROJECT_NAME:-default}.altis.dev
@@ -202,23 +201,6 @@ services:
       mc mb -p local/s3-${COMPOSE_PROJECT_NAME:-default}
       && mc policy set public local/s3-${COMPOSE_PROJECT_NAME:-default}
       && mc mirror --watch --overwrite local/s3-${COMPOSE_PROJECT_NAME:-default} /wp-content"
-  tachyon:
-    image: humanmade/tachyon:2.3.2
-    ports:
-      - "8080"
-    networks:
-      - proxy
-    labels:
-      - "traefik.port=8080"
-      - "traefik.protocol=http"
-      - "traefik.docker.network=proxy"
-      - "traefik.frontend.rule=HostRegexp:${COMPOSE_PROJECT_NAME:-default}.altis.dev,{subdomain:[a-z.-_]+}.${COMPOSE_PROJECT_NAME:-default}.altis.dev;PathPrefix:/tachyon;ReplacePathRegex:^/tachyon/(.*) /uploads/$$1"
-    environment:
-      AWS_REGION: us-east-1
-      AWS_S3_BUCKET: s3-${COMPOSE_PROJECT_NAME:-default}
-      AWS_S3_ENDPOINT: https://altis.dev/
-    external_links:
-      - "proxy:s3-${COMPOSE_PROJECT_NAME:-default}.altis.dev"
   mailhog:
     image: mailhog/mailhog:latest
     ports:
