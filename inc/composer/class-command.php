@@ -37,7 +37,7 @@ class Command extends BaseCommand {
 				new InputArgument( 'subcommand', null, 'start, stop, restart, cli, exec, shell, status, db, logs.' ),
 				new InputArgument( 'options', InputArgument::IS_ARRAY ),
 			] )
-			->setAliases( [ 'local-server' ] )
+			->setAliases( [ 'local-server', 'local-vip' ] )
 			->setHelp(
 				<<<EOT
 Run the local development server.
