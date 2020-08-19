@@ -45,8 +45,7 @@ x-php: &php
     WP_DEBUG: 1
     WP_DEBUG_DISPLAY: 0
     PAGER: more
-    HM_ENV_ARCHITECTURE: 'local-server'
-    HM_DEPLOYMENT_REVISION: 'dev'
+    ENV_ARCHITECTURE: 'local-server'
     ELASTICSEARCH_HOST: elasticsearch
     ELASTICSEARCH_PORT: 9200
     AWS_XRAY_DAEMON_HOST: xray
