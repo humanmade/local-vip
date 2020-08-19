@@ -27,6 +27,7 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface {
 	 * @return void
 	 */
 	public function activate( Composer $composer, IOInterface $io ) {
+		$this->composer = $composer;
 	}
 
 	/**
