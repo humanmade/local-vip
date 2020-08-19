@@ -14,7 +14,7 @@
 		"composer-plugin-api": "^1.1"
 	},
 	"extra": {
-		"class": "Local_Server_VIP\\Composer\\Plugin"
+		"class": "HM\\Local_VIP\\Composer\\Plugin"
 	},
 	"autoload": {
 		"classmap": [

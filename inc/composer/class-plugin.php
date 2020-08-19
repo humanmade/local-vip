@@ -5,7 +5,7 @@
  * @package humanmade/local-vip
  */
 
-namespace Altis\Local_Server\Composer;
+namespace HM\Local_VIP\Composer;
 
 use Composer\Composer;
 use Composer\EventDispatcher\EventSubscriberInterface;

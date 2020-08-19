@@ -7,7 +7,7 @@
  * @package humanmade/local-vip
  */
 
-namespace Local_Server_VIP\Composer;
+namespace HM\Local_VIP\Composer;
 
 use Composer\Command\BaseCommand;
 use Symfony\Component\Console\Input\ArrayInput;

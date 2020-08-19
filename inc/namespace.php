@@ -5,7 +5,7 @@
  * @package humanmade/local-vip
  */
 
-namespace Local_Server_VIP;
+namespace HM\Local_VIP;
 
 /**
  * Configure environment for local server.
