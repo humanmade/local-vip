@@ -1,18 +1,16 @@
-# Local Server
+# Local VIP
 
-![](./assets/banner-local-server.png)
+**Note:** Local VIP is a Docker-based environment. If you experience any issues running it consult the [Chassis](https://chassis.io) documentation for an alternative local environment.
 
-**Note:** Local Server is a Docker-based environment. If you experience any issues running it consult the [Local Chassis](docs://local-chassis) documentation for an alternative local environment.
+Local VIP provides a local development environment for WordPress VIP projects. It is built on a containerized architecture using Docker images and Docker Compose to provide drop-in replacements or alternatives for most parts of the WordPress VIP platform.
 
-The Local Server module providers a local development environment for Altis projects. It is built on a containerized architecture using Docker images and Docker Compose to provide drop-in replacements for most components of the Cloud infrastructure.
+Local VIP is forked from [Altis Local Server](https://www.altis-dxp.com/resources/docs/local-server/), and supports most of the same commands and interface.
 
 ## Installing
 
-Local Server uses Docker for containerization, therefore you must install the Docker runtime on your computer as a prerequisite. Download and install Docker for your OS at [https://www.docker.com/get-started](https://www.docker.com/get-started).
+Local VIP uses Docker for containerization, therefore you must install the Docker runtime on your computer as a prerequisite. Download and install Docker for your OS at [https://www.docker.com/get-started](https://www.docker.com/get-started).
 
-Once Docker is installed and running, you are ready to start the Local Server. Local Server uses the command line via the `composer` command.
-
-Navigate your shell to your project's directory. You should already have installed Altis by running `composer install` or `composer create-project` but if not, do so now. See [Creating A New Altis Project](https://www.altis-dxp.com/resources/docs/getting-started/#creating-a-new-altis-project)
+Once Docker is installed and running, you are ready to start the Local Server. Local VIP is controlled from the command line via the `composer` command.
 
 ## Starting the Local Server
 
@@ -56,11 +54,10 @@ The subdomain used for the project can be configured via the `modules.local-serv
 * `composer server restart` - Restart the containers.
 * `composer server destroy` - Stops and destroys all containers.
 * `composer server status` - Displays the status of all containers.
-* `composer server logs <service>` - Tail the logs from a given service, defaults to `php`, available options are `nginx`, `php`, `db`, `redis`, `cavalcade`, `tachyon`, `s3` and `elasticsearch`.
+* `composer server logs <service>` - Tail the logs from a given service, defaults to `php`, available options are `nginx`, `php`, `db`, `redis`, `cavalcade`, `s3` and `elasticsearch`.
 * `composer server shell` - Logs in to the PHP container.
 * `composer server cli -- <command>` - Runs a WP CLI command, you should omit the 'wp' for example `composer server cli -- info`
 * `composer server exec -- <command>` - Runs any command on the PHP container.
 * `composer server db` - Logs into MySQL on the DB container.
   * `composer server db info` - Print MySQL connection details.
   * `composer server db sequel` - Opens a connection to the database in [Sequel Pro](https://sequelpro.com).
-* `composer server import-uploads` - Syncs files from `content/uploads` to the s3 container.
