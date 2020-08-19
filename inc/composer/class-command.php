@@ -7,7 +7,7 @@
  * @package altis/local-server
  */
 
-namespace Altis\Local_Server\Composer;
+namespace Local_Server_VIP\Composer;
 
 use Composer\Command\BaseCommand;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -18,7 +18,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Process\Process;
 
 /**
- * Altis Local Server Composer Command.
+ * Local Server for VIP Composer Command.
  *
  * @package altis/local-server
  */
@@ -32,7 +32,7 @@ class Command extends BaseCommand {
 	protected function configure() {
 		$this
 			->setName( 'server' )
-			->setDescription( 'Altis Local Server' )
+			->setDescription( 'Local Server for VIP Projects' )
 			->setDefinition( [
 				new InputArgument( 'subcommand', null, 'start, stop, restart, cli, exec, shell, status, db, logs.' ),
 				new InputArgument( 'options', InputArgument::IS_ARRAY ),

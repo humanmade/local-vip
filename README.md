@@ -4,18 +4,14 @@
 
 <p align="center"><a href="https://packagist.org/packages/altis/local-server"><img alt="Packagist Version" src="https://img.shields.io/packagist/v/altis/local-server.svg"></a></p>
 
-## Local Server
+## Local Server for VIP Projects
 
-A local development environment for Altis projects, built on Docker.
+A local development environment for WordPress VIP projects, built on Docker.
 
 ## Dependencies
 
 * [Composer](https://getcomposer.org/download/)
 * [Docker Desktop](https://www.docker.com/get-started) (you can [install Docker Machine directly](https://docs.docker.com/machine/install-machine/) if preferred)
-
-## Installation with Altis
-
-Altis Local Server is included by default in an Altis project, so you don't need to install anything else.
 
 ## Installation without Altis
 
@@ -25,7 +21,7 @@ Altis Local Server can be installed as a dependency within a Composer-based Word
 
 ## Getting Started
 
-In your Altis project you can run the following commands:
+In your local server project you can run the following commands:
 
 ```
 # Start the server cluster

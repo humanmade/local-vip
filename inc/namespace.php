@@ -1,11 +1,11 @@
 <?php
 /**
- * Altis Local Server.
+ * Local Server for WordPress VIP Projects.
  *
  * @package altis/local-server
  */
 
-namespace Altis\Local_Server;
+namespace Local_Server_VIP;
 
 /**
  * Configure environment for local server.

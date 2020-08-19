@@ -1,6 +1,6 @@
 {
 	"name": "altis/local-server",
-	"description": "Local Server module for Altis",
+	"description": "Local Server module for WordPress VIP projects",
 	"type": "composer-plugin",
 	"license": "GPL-2.0-or-later",
 	"authors": [
@@ -14,7 +14,7 @@
 		"composer-plugin-api": "^1.1"
 	},
 	"extra": {
-		"class": "Altis\\Local_Server\\Composer\\Plugin"
+		"class": "Local_Server_VIP\\Composer\\Plugin"
 	},
 	"autoload": {
 		"classmap": [
