@@ -55,6 +55,26 @@ function set_file_path_map( array $map ) : array {
 }
 
 /**
+ * Add new submenus to Tools admin menu.
+ */
+function tools_submenus() {
+	$links = [
+		[
+			'label' => 'Kibana',
+			'url' => network_site_url( '/kibana' ),
+		],
+		[
+			'label' => 'MailHog',
+			'url' => network_site_url( '/mailhog' ),
+		],
+	];
+
+	foreach ( $links as $link ) {
+		add_management_page( $link['label'], $link['label'], 'manage_options', $link['url'] );
+	}
+}
+
+/**
  * Override Elasticsearch package storage location to es-packages volume.
  *
  * This directory is shared with the Elasticsearch container.
