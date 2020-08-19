@@ -73,14 +73,17 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface {
 			file_put_contents( $dest . '/.gitignore', implode( "\n", $entries ) );
 		}
 
-		if ( ! is_dir( $dest . '/wp-content' ) ) {
-			mkdir( $dest . '/wp-content' );
-		}
-		if ( ! is_dir( $dest . '/wp-content/plugins' ) ) {
-			mkdir( $dest . '/wp-content/plugins' );
-		}
-		if ( ! is_dir( $dest . '/wp-content/themes' ) ) {
-			mkdir( $dest . '/wp-content/themes' );
+		$directories = [
+			'/wp-content',
+			'/wp-content/plugins',
+			'/wp-content/themes',
+			'/wp-content/uploads',
+		];
+
+		foreach ( $directories as $required_directory ) {
+			if ( ! is_dir( $dest . $required_directory ) ) {
+				mkdir( $dest . $required_directory );
+			}
 		}
 	}
 }
