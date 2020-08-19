@@ -599,7 +599,40 @@ EOT;
 	 *
 	 * @return string
 	 */
+	protected function get_server_config() : string {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$composer_json = json_decode( file_get_contents( getcwd() . '/composer.json' ), true );
+		if ( isset( $composer_json['extra']['local-vip'] ) ) {
+			return $composer_json['extra']['local-vip'];
+		}
+		return [];
+	}
+
+	/**
+	 * Get the name of the project for the local subdomain
+	 *
+	 * @return string
+	 */
 	protected function get_project_subdomain() : string {
+		$config = $this->get_server_config();
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$composer_json = json_decode( file_get_contents( getcwd() . '/composer.json' ), true );
+
+		if ( isset( $config['name'] ) ) {
+			$project_name = $config['name'];
+		} else {
+			$project_name = basename( getcwd() );
+		}
+
+		return preg_replace( '/[^A-Za-z0-9\-\_]/', '', $project_name );
+	}
+
+	/**
+	 * Get the name of the project for the local subdomain
+	 *
+	 * @return string
+	 */
+	protected function get_project_hostname() : string {
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$composer_json = json_decode( file_get_contents( getcwd() . '/composer.json' ), true );
