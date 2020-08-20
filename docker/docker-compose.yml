@@ -86,8 +86,6 @@ services:
       context: ./php
       args:
         BASE_PHP_IMAGE: ${PHP_IMAGE:-humanmade/altis-local-server-php:3.2.0}
-    depends_on:
-      - memcached
 
   nginx:
     image: humanmade/altis-local-server-nginx:3.1.0
