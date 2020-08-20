@@ -250,16 +250,16 @@ EOT
 					if ( is_string( $title ) ) {
 						$site_options[] = '--title=' . $title;
 					}
-					$cli->run( new ArrayInput( [
+					$site_created = $cli->run( new ArrayInput( [
 						'subcommand' => 'cli',
 						'options' => $site_options,
-					] ), $output );
+					] ), $output ) === 0;
 
-					// if ( $site_creation_failed ) {
-					// 		$output->writeLn( sprintf( '<warning>Failed to create network site %s</>', $slug ) );
-					// } else {
-					// 		$output->writeln( sprintf( '<info>Created network site %s</>', $slug ) );
-					// }
+					if ( $site_created ) {
+						$output->writeln( sprintf( 'Created network site %s', $slug ) );
+					} else {
+						$output->writeLn( sprintf( '<warning>Failed to create network site %s</>', $slug ) );
+					}
 				}
 			}
 
