@@ -636,7 +636,7 @@ EOT;
 	 *
 	 * @return array
 	 */
-	protected function get_server_config() : string {
+	protected function get_server_config() : array {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$composer_json = json_decode( file_get_contents( getcwd() . '/composer.json' ), true );
 		if ( isset( $composer_json['extra']['local-vip'] ) ) {
