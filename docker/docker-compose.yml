@@ -101,7 +101,7 @@ services:
       - "traefik.port=8080"
       - "traefik.protocol=https"
       - "traefik.docker.network=proxy"
-      - "traefik.frontend.rule=HostRegexp:${HTTP_HOST:-default},{subdomain:[a-z.-_]+}.${HTTP_HOST:-default}"
+      - "traefik.frontend.rule=HostRegexp:${HTTP_HOST:-default},{subdomain:[a-z._-]+}.${HTTP_HOST:-default}"
   xray:
     image: amazon/aws-xray-daemon:3.0.1
     ports:
