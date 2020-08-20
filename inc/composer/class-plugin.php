@@ -1,6 +1,6 @@
 <?php
 /**
- * Local Server Composer Plugin.
+ * Local VIP Composer Plugin.
  *
  * @package humanmade/local-vip
  */
@@ -14,7 +14,7 @@ use Composer\Plugin\Capable;
 use Composer\Plugin\PluginInterface;
 
 /**
- * Altis Local Server Composer Plugin.
+ * Local VIP Composer Plugin.
  *
  * @package humanmade/local-vip
  */

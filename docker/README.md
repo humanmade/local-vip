@@ -12,5 +12,5 @@ If you wish to re-use this configuration, you'll need to use the `COMPOSE_PROJEC
 VOLUME=/path/to/wordpress/project COMPOSE_PROJECT_NAME=some-project docker-compose up
 ```
 
-We can now pass the `COMPOSE_PROJECT_NAME` environment variable when running `docker-compose up`, and it will use that value as the name of the domain. The above example will use `COMPOSE_PROJECT_NAME` for the name of the domain, or `default` if none is passed. For instance, if we pass `COMPOSE_PROJECT_NAME=foobar`, the domain Traefik uses is `foobar.altis.dev`.
+We can now pass the `COMPOSE_PROJECT_NAME` environment variable when running `docker-compose up`, and it will use that value as the name of the domain. The above example will use `COMPOSE_PROJECT_NAME` for the name of the domain, or `default` if none is passed. For instance, if we pass `COMPOSE_PROJECT_NAME=foobar`, the domain Traefik uses is `foobar.local`.
 

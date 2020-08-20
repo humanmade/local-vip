@@ -1,10 +1,8 @@
 # ElasticSearch
 
-ElasticSearch is an integral component of Altis, enabling enhanced search and relevancy as well as powering the analytics data query layer.
-
 ## Kibana
 
-Local Server provides [Kibana](https://www.elastic.co/products/kibana) out of the box, a powerful tool for viewing indexes, creating and debugging queries and more.
+Local VIP provides [Kibana](https://www.elastic.co/products/kibana) out of the box, a powerful tool for viewing indexes, creating and debugging queries and more.
 
 Kibana is available at [`/kibana/`](internal://site/kibana/).
 

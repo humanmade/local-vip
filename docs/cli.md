@@ -16,7 +16,7 @@ composer server exec -- printenv
 
 ## WP CLI
 
-Local Server provides special support for [WP CLI](https://wp-cli.org/) commands via the `composer server cli --` command. Prepend all your commends with `composer server cli --` and drop the proceeding `wp`. For example, to list all posts:
+Local VIP provides special support for [WP CLI](https://wp-cli.org/) commands via the `composer server cli --` command. Prepend all your commends with `composer server cli --` and drop the proceeding `wp`. For example, to list all posts:
 
 ```sh
 composer server cli -- post list
@@ -28,7 +28,7 @@ To install a new language file and activate it:
 composer server cli -- language core install fr_FR
 ```
 
-CLI commands via Local Server also support piping, for example import a database SQL file:
+CLI commands via Local VIP also support piping, for example import a database SQL file:
 
 ```sh
 composer server cli -- db import - < ~/Downloads/database.sql

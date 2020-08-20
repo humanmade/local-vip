@@ -1,6 +1,6 @@
 <?php
 /**
- * Local Server Composer Command Provider.
+ * Local VIP Composer Command Provider.
  *
  * @package humanmade/local-vip
  */
@@ -10,7 +10,7 @@ namespace HM\Local_VIP\Composer;
 use Composer\Plugin\Capability\CommandProvider as CommandProviderCapability;
 
 /**
- * Altis Local Server Composer Command Provider.
+ * Local VIP Composer Command Provider.
  *
  * @package humanmade/local-vip
  */

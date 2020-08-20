@@ -1,6 +1,6 @@
 <?php
 /**
- * Local Server Composer Command.
+ * Local VIP Composer Command.
  *
  * phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
  *
@@ -18,7 +18,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Process\Process;
 
 /**
- * Local Server for VIP Composer Command.
+ * Local VIP Composer Command.
  *
  * @package humanmade/local-vip
  */

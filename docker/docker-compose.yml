@@ -24,7 +24,7 @@ x-php: &php
   volumes:
     - "${VOLUME}:/usr/src/app:delegated"
     # Use zzz as a prefix to ensure the php.ini overrides are loaded last
-    - "${PWD}/php.ini:/usr/local/etc/php/conf.d/zzz-altis.ini"
+    - "${PWD}/php.ini:/usr/local/etc/php/conf.d/zzz-vip.ini"
     - socket:/var/run/php-fpm
   networks:
     - proxy
@@ -47,8 +47,6 @@ x-php: &php
     ELASTICSEARCH_PORT: 9200
     AWS_XRAY_DAEMON_HOST: xray
     PHP_SENDMAIL_PATH: /usr/sbin/sendmail -t -i -S mailhog:1025
-    ALTIS_ANALYTICS_PINPOINT_ENDPOINT: https://pinpoint-${HTTP_HOST:-default}
-    ALTIS_ANALYTICS_COGNITO_ENDPOINT: https://cognito-${HTTP_HOST:-default}
     # Setting required for minimal config in PHPStorm
     PHP_IDE_CONFIG: serverName=${HTTP_HOST:-default}
     # Enables XDebug for all processes and allows setting remote_host externally for Linux support

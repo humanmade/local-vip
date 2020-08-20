@@ -1,6 +1,6 @@
 # Using XDebug
 
-Bugs are an inevitability of writing code and so Local Server provides an easy way to enable [XDebug](https://xdebug.org/) when you need it.
+Bugs are an inevitability of writing code and so Local VIP provides an easy way to enable [XDebug](https://xdebug.org/) when you need it.
 
 XDebug is _not enabled by default_ because it slows PHP down considerably. This could make you less productive depending on the work you're doing.
 
@@ -96,8 +96,8 @@ Local Server takes advantage of PHPStorm's [Zero Configuration Debugging](https:
 
 1. Go to [Preferences > Languages & Frameworks > PHP > Servers](jetbrains://PhpStorm/settings?name=Languages+%26+Frameworks--PHP--Servers) (link opens in PHPStorm).
 2. Click the plus icon and create a new Server entry with the following settings:
-   - The name should be your project host name: `<my-project>.altis.dev`
-   - The host name should also be: `<my-project>.altis.dev`
+   - The name should be your project host name, e.g. `my-project.local`
+   - The host name should be the same as the server name: `my-project.local`
    - Port: `443`
    - Check the "Use path mappings" box
    - Next to your project's root directory enter `/usr/src/app`

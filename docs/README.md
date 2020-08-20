@@ -14,7 +14,7 @@ Once Docker is installed and running, you are ready to start the Local Server. L
 
 ## Starting the Local Server
 
-To start the Local Server, run `composer server`. The first time you run this it will download all the necessary Docker images.
+To start the local environment, run `composer server`. The first time you run this it will download all the necessary Docker images.
 
 Once the initial download and install has completed, you should see the output:
 
