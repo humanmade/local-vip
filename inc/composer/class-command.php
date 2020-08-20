@@ -140,6 +140,7 @@ EOT
 		return [
 			'VOLUME' => getcwd(),
 			'COMPOSE_PROJECT_NAME' => $this->get_project_name(),
+			'HTTP_HOST' => $this->get_project_hostname(),
 			'PATH' => getenv( 'PATH' ),
 			'ES_MEM_LIMIT' => getenv( 'ES_MEM_LIMIT' ) ?: '1g',
 		];
@@ -187,7 +188,10 @@ EOT
 			return $failed;
 		}
 
+		$output->writeln( 'A' );
+
 		$cli = $this->getApplication()->find( 'local-server' );
+		$output->writeln( 'B' );
 
 		// Check if WP is already installed.
 		$is_installed = $cli->run( new ArrayInput( [
@@ -195,15 +199,17 @@ EOT
 			'options' => [
 				'core',
 				'is-installed',
-				// '--quiet',
+				'--quiet',
 			],
 		] ), $output ) === 0;
+		$output->writeln( 'C' );
 
-		$server_config = $this->get_server_config();
-		$use_subdomains = ( $server_config['subdomains'] ?? false ) !== false;
-		$hostname = $this->get_project_hostname();
 
 		if ( ! $is_installed ) {
+			$server_config = $this->get_server_config();
+			$use_subdomains = ( $server_config['subdomains'] ?? false ) !== false;
+			$hostname = $this->get_project_hostname();
+
 			$install_options = [
 				'core',
 				'multisite-install',
@@ -220,6 +226,8 @@ EOT
 				$install_options[] = '--subdomains';
 			}
 
+			$output->writeln( sprintf( '<info>%s</>', print_r( $install_options, true ) ) );
+
 			$install_failed = $cli->run( new ArrayInput( [
 				'subcommand' => 'cli',
 				'options' => $install_options,
@@ -231,6 +239,8 @@ EOT
 				return $install_failed;
 			}
 
+			$output->writeln( '<info>Installed database.</>' );
+
 			$sites = $server_config['sites'] ?? [];
 			if ( is_array( $sites ) && ! empty( $sites ) ) {
 				foreach ( $sites as $title => $slug ) {
@@ -241,24 +251,24 @@ EOT
 						'site',
 						'create',
 						'--slug=' . preg_replace( '/[^A-Za-z0-9\-\_]/', '', $slug ),
+						'--quiet',
 					];
 					if ( is_string( $title ) ) {
 						$site_options[] = '--title=' . $title;
 					}
-					$site_creation_failed = $cli->run( new ArrayInput( [
+					$cli->run( new ArrayInput( [
 						'subcommand' => 'cli',
 						'options' => $site_options,
 					] ), $output );
 
-					if ( $site_creation_failed ) {
-						$output->writeLn( '<warning>Failed to create network site %s</>', $slug );
-					} else {
-						$output->writeln( '<info>Created network site %s</>', $slug );
-					}
+					// if ( $site_creation_failed ) {
+					// 		$output->writeLn( sprintf( '<warning>Failed to create network site %s</>', $slug ) );
+					// } else {
+					// 		$output->writeln( sprintf( '<info>Created network site %s</>', $slug ) );
+					// }
 				}
 			}
 
-			$output->writeln( '<info>Installed database.</>' );
 			$output->writeln( '<info>WP Username:</>	<comment>admin</>' );
 			$output->writeln( '<info>WP Password:</>	<comment>password</>' );
 		}
@@ -671,7 +681,7 @@ EOT;
 		$server_config = $this->get_server_config();
 
 		if ( isset( $server_config['host'] ) ) {
-			return preg_replace( '/[^A-Za-z0-9\-\_.]/', '', $$server_config['host'] );
+			return preg_replace( '/[^A-Za-z0-9\-\_.]/', '', $server_config['host'] );
 		}
 
 		// Use {configured project name or project directory name}.local as fallback.

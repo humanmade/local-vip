@@ -12,7 +12,11 @@ namespace HM\Local_VIP;
  */
 function bootstrap() {
 	if ( empty( $_SERVER['HTTP_HOST'] ) ) {
-		$_SERVER['HTTP_HOST'] = getenv( 'COMPOSE_PROJECT_NAME' ) . '.altis.dev';
+		// Try reading HTTP Host from environment, and fall back to {project name}.local
+		$_SERVER['HTTP_HOST'] = getenv( 'HTTP_HOST' );
+		if ( empty( $_SERVER['HTTP_HOST'] ) ) {
+			$_SERVER['HTTP_HOST'] = getenv( 'COMPOSE_PROJECT_NAME' ) . '.local';
+		}
 	}
 
 	define( 'DB_HOST', getenv( 'DB_HOST' ) );
