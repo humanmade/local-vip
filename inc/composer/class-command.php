@@ -63,7 +63,7 @@ Database commands:
 	db sequel                     Generates an SPF file for Sequel Pro
 	db info                       Prints out Database connection details
 View the logs
-	logs <service>                <service> can be php, nginx, db, s3, elasticsearch, xray
+	logs <service>                <service> can be php, nginx, db, elasticsearch, xray
 EOT
 			)
 			->addOption( 'xdebug' );
@@ -604,35 +604,6 @@ EOT;
 				'PORT' => $ports_matches[2],
 			]
 		);
-	}
-
-	/**
-	 * Pass a command through to the minio client.
-	 *
-	 * @param string $command The command for minio client.
-	 * @return int
-	 */
-	protected function minio_client( string $command ) {
-		$columns = exec( 'tput cols' );
-		$lines = exec( 'tput lines' );
-
-		$base_command = sprintf(
-			'docker run ' .
-				'-e COLUMNS=%1%d -e LINES=%2$d ' .
-				'--volume=%3$s/vendor/humanmade/local-vip/docker/minio.json:/root/.mc/config.json ' .
-				'--volume=%3$s/wp-content/uploads:/wp-content/uploads:delegated ' .
-				'--network=%4$s_default ' .
-				'minio/mc:RELEASE.2020-03-14T01-23-37Z %5$s',
-			$columns,
-			$lines,
-			getcwd(),
-			$this->get_project_name(),
-			escapeshellcmd( $command )
-		);
-
-		passthru( $base_command, $return_var );
-
-		return $return_var;
 	}
 
 	/**
