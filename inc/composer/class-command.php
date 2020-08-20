@@ -188,10 +188,7 @@ EOT
 			return $failed;
 		}
 
-		$output->writeln( 'A' );
-
 		$cli = $this->getApplication()->find( 'local-server' );
-		$output->writeln( 'B' );
 
 		// Check if WP is already installed.
 		$is_installed = $cli->run( new ArrayInput( [
@@ -202,7 +199,6 @@ EOT
 				'--quiet',
 			],
 		] ), $output ) === 0;
-		$output->writeln( 'C' );
 
 
 		if ( ! $is_installed ) {
@@ -225,8 +221,6 @@ EOT
 			if ( $use_subdomains ) {
 				$install_options[] = '--subdomains';
 			}
-
-			$output->writeln( sprintf( '<info>%s</>', print_r( $install_options, true ) ) );
 
 			$install_failed = $cli->run( new ArrayInput( [
 				'subcommand' => 'cli',
