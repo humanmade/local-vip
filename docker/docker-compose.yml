@@ -5,7 +5,7 @@ x-php: &php
   depends_on:
     db:
       condition: service_healthy
-    redis:
+    memcached:
       condition: service_started
     elasticsearch:
       condition: service_healthy
@@ -37,8 +37,6 @@ x-php: &php
     DB_PASSWORD: wordpress
     DB_NAME: wordpress
     DB_USER: wordpress
-    REDIS_HOST: redis
-    REDIS_PORT: 6379
     WP_DEBUG: 1
     WP_DEBUG_DISPLAY: 0
     PAGER: more
@@ -79,13 +77,17 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
-  redis:
-    image: redis:3.2-alpine
-    ports:
-      - '6379'
+
+  memcached:
+    image: memcached
+    restart: always
+
   php:
     <<: *php
     image: ${PHP_IMAGE:-humanmade/altis-local-server-php:3.2.0}
+    depends_on:
+      - memcached
+
   nginx:
     image: humanmade/altis-local-server-nginx:3.1.0
     networks:
@@ -112,12 +114,14 @@ services:
       AWS_ACCESS_KEY_ID: YOUR_KEY_HERE
       AWS_SECRET_ACCESS_KEY: YOUR_SECRET_HERE
       AWS_REGION: us-east-1
+
   cavalcade:
     <<: *php
     entrypoint:
       - /usr/local/bin/cavalcade
     user: "nobody:nobody"
     restart: unless-stopped
+
   elasticsearch:
     image: humanmade/altis-local-server-elasticsearch:3.0.0
     ulimits:
@@ -152,6 +156,7 @@ services:
 
       # Reduce from default of 1GB of memory to 512MB
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
+
   mailhog:
     image: mailhog/mailhog:latest
     ports:
@@ -175,6 +180,7 @@ services:
       - "traefik.protocol=http"
       - "traefik.docker.network=proxy"
       - "traefik.frontend.rule=Host:cognito-${HTTP_HOST:-default}"
+
   pinpoint:
     <<: *analytics
     image: humanmade/local-pinpoint:1.2.2
@@ -185,6 +191,7 @@ services:
       - "traefik.frontend.rule=Host:pinpoint-${HTTP_HOST:-default}"
     environment:
       INDEX_ROTATION: OneDay
+
   kibana:
     image: blacktop/kibana:6.3
     networks:

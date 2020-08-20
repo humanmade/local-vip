@@ -36,12 +36,6 @@ function bootstrap() {
 		define( 'AWS_XRAY_DAEMON_IP_ADDRESS', gethostbyname( getenv( 'AWS_XRAY_DAEMON_HOST' ) ) );
 	}
 
-	global $redis_server;
-	$redis_server = [
-		'host' => getenv( 'REDIS_HOST' ),
-		'port' => getenv( 'REDIS_PORT' ),
-	];
-
 	add_filter( 'qm/output/file_path_map', __NAMESPACE__ . '\\set_file_path_map', 1 );
 }
 
