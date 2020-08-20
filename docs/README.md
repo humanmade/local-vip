@@ -23,28 +23,38 @@ Installed database.
 WP Username:	admin
 WP Password:	password
 Startup completed.
-To access your site visit: https://my-site.altis.dev/
+To access your site visit: https://my-site.local/
 ```
 
 Visiting your site's URL should now work. Visit `/wp-admin/` and login with the username `admin` and password `password` to get started!
 
 > [If the server does not start for any reason take a look at the troubleshooting guide](./troubleshooting.md)
 
-The subdomain used for the project can be configured via the `modules.local-server.name` setting:
+## Configuration
+
+Server options can be configured via the `extra.local-vip` section in your composer.json:
 
 ```json
 {
 	"extra": {
-		"altis": {
-			"modules": {
-				"local-server": {
-					"name": "my-project"
-				}
+		"local-vip": {
+			"name": "my-project",
+			"host": "mycompany.local",
+			"subdomains": true,
+			"sites": {
+				"Subsite Title": "subsite-slug"
 			}
 		}
 	}
 }
 ```
+
+### Configuration Options
+
+- **name**: The name to use for the Docker containers and the default hostname. Defaults to the name of your project's root folder.
+- **host**: The host name to use for your local site. Defaults to {name}.local.
+- **subdomains**: Whether to set up new network sites as subdomains. Defaults to false, which causes sites to be created as subdirectories.
+- **sites**: An array or object of sites to create on the network. Either pass an array of subsite slugs, or an object of Title: slug pairs.
 
 ## Available Commands
 
