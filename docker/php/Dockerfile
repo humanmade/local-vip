@@ -1,4 +1,4 @@
-ARG BASE_PHP_IMAGE=humanmade/altis-local-server-php:3.2.0
+ARG BASE_PHP_IMAGE
 FROM ${BASE_PHP_IMAGE}
 
 USER root
@@ -10,7 +10,6 @@ RUN set -ex \
 		zlib-dev \
 		g++ \
 		make \
-        autoconf \
 	# Install PHP Extensions
 	&& apk add -u --no-cache \
         libmemcached-dev \
