@@ -42,7 +42,7 @@ Server options can be configured via the `extra.local-vip` section in your compo
 			"host": "mycompany.local",
 			"subdomains": true,
 			"sites": {
-				"Subsite Title": "subsite-slug"
+				"subsite-slug": "Subsite Title"
 			}
 		}
 	}

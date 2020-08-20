@@ -234,9 +234,9 @@ EOT
 
 			$sites = $server_config['sites'] ?? [];
 			if ( is_array( $sites ) && ! empty( $sites ) ) {
-				foreach ( $sites as $title => $slug ) {
+				foreach ( $sites as $slug => $title ) {
 					if ( ! is_string( $slug ) ) {
-						continue;
+						$slug = $title;
 					}
 					$site_options = [
 						'site',
@@ -244,7 +244,7 @@ EOT
 						'--slug=' . preg_replace( '/[^A-Za-z0-9\-\_]/', '', $slug ),
 						'--quiet',
 					];
-					if ( is_string( $title ) ) {
+					if ( is_string( $title ) && $title !== $slug ) {
 						$site_options[] = '--title=' . $title;
 					}
 					$site_created = $cli->run( new ArrayInput( [
