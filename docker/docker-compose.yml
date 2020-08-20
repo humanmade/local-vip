@@ -18,8 +18,6 @@ x-php: &php
     - "db:db-read-replica"
   external_links:
     - "proxy:${HTTP_HOST:-default}"
-    - "proxy:pinpoint-${HTTP_HOST:-default}"
-    - "proxy:cognito-${HTTP_HOST:-default}"
     - "proxy:elasticsearch-${HTTP_HOST:-default}"
   volumes:
     - "${VOLUME}:/usr/src/app:delegated"
@@ -172,25 +170,6 @@ services:
       - "traefik.frontend.rule=Host:${HTTP_HOST:-default};PathPrefix:/mailhog"
     environment:
       MH_UI_WEB_PATH: mailhog
-  cognito:
-    <<: *analytics
-    image: humanmade/local-cognito:1.0.0
-    labels:
-      - "traefik.port=3000"
-      - "traefik.protocol=http"
-      - "traefik.docker.network=proxy"
-      - "traefik.frontend.rule=Host:cognito-${HTTP_HOST:-default}"
-
-  pinpoint:
-    <<: *analytics
-    image: humanmade/local-pinpoint:1.2.2
-    labels:
-      - "traefik.port=3000"
-      - "traefik.protocol=http"
-      - "traefik.docker.network=proxy"
-      - "traefik.frontend.rule=Host:pinpoint-${HTTP_HOST:-default}"
-    environment:
-      INDEX_ROTATION: OneDay
 
   kibana:
     image: blacktop/kibana:6.3
