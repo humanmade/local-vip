@@ -11,18 +11,23 @@ namespace HM\Local_VIP;
  * Configure environment for local server.
  */
 function bootstrap() {
+	// Try reading HTTP Host from environment
 	if ( empty( $_SERVER['HTTP_HOST'] ) ) {
-		// Try reading HTTP Host from environment, and fall back to {project name}.local
 		$_SERVER['HTTP_HOST'] = getenv( 'HTTP_HOST' );
-		if ( empty( $_SERVER['HTTP_HOST'] ) ) {
-			$_SERVER['HTTP_HOST'] = getenv( 'COMPOSE_PROJECT_NAME' ) . '.local';
-		}
+	}
+	// fall back to {project name}.local
+	if ( empty( $_SERVER['HTTP_HOST'] ) ) {
+		$_SERVER['HTTP_HOST'] = getenv( 'COMPOSE_PROJECT_NAME' ) . '.local';
 	}
 
-	define( 'DB_HOST', getenv( 'DB_HOST' ) );
-	define( 'DB_USER', getenv( 'DB_USER' ) );
-	define( 'DB_PASSWORD', getenv( 'DB_PASSWORD' ) );
-	define( 'DB_NAME', getenv( 'DB_NAME' ) );
+	if ( in_array( getenv( 'SUBDOMAIN_INSTALL' ), [ true, 1 ] ) ) {
+		define( 'SUBDOMAIN_INSTALL', 1 );
+	}
+
+	defined( 'DB_HOST' ) or define( 'DB_HOST', getenv( 'DB_HOST' ) );
+	defined( 'DB_USER' ) or define( 'DB_USER', getenv( 'DB_USER' ) );
+	defined( 'DB_PASSWORD' ) or define( 'DB_PASSWORD', getenv( 'DB_PASSWORD' ) );
+	defined( 'DB_NAME' ) or define( 'DB_NAME', getenv( 'DB_NAME' ) );
 
 	define( 'ELASTICSEARCH_HOST', getenv( 'ELASTICSEARCH_HOST' ) );
 	define( 'ELASTICSEARCH_PORT', getenv( 'ELASTICSEARCH_PORT' ) );
@@ -39,6 +44,14 @@ function bootstrap() {
 
 	add_filter( 'qm/output/file_path_map', __NAMESPACE__ . '\\set_file_path_map', 1 );
 }
+
+// In altis/local-server this code is triggered as an Altis module. Without
+// framework available, we need to kick this off manually.
+/* phpcs:disable PSR1.Files.SideEffects */
+if ( ENV_ARCHITECTURE === 'local-server' ) {
+	bootstrap();
+}
+/* phpcs:enable PSR1.Files.SideEffects */
 
 /**
  * Enables Query Monitor to map paths to their original values on the host.

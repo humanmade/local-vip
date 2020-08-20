@@ -5,7 +5,7 @@
  * local-server context. Therefore, we only define ENV_ARCHITECTURE
  * if we are in that context.
  *
- * This module will only then enable it's self if the architecture is local-server.
+ * This module will only enable itself if the architecture is local-server.
  *
  * @package humanmade/local-vip
  */

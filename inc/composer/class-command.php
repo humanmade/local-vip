@@ -143,6 +143,10 @@ EOT
 			'HTTP_HOST' => $this->get_project_hostname(),
 			'PATH' => getenv( 'PATH' ),
 			'ES_MEM_LIMIT' => getenv( 'ES_MEM_LIMIT' ) ?: '1g',
+			// Pass subdomain config through to docker, and from there on to PHP.
+			// This is necessary to enable subdomains, because the --subdomains
+			// argument to multisite-install has no effect.
+			'SUBDOMAIN_INSTALL' => ( $this->get_server_config()['subdomains'] ?? false ) ? 1 : 0,
 		];
 	}
 
@@ -203,28 +207,21 @@ EOT
 
 		if ( ! $is_installed ) {
 			$server_config = $this->get_server_config();
-			$use_subdomains = ( $server_config['subdomains'] ?? false ) !== false;
 			$hostname = $this->get_project_hostname();
-
-			$install_options = [
-				'core',
-				'multisite-install',
-				'--title=' . ( $server_config['title'] ?? 'VIP Project' ),
-				'--admin_user=admin',
-				'--admin_password=password',
-				'--admin_email=no-reply@' . $hostname,
-				'--skip-email',
-				'--skip-config',
-				'--quiet',
-			];
-
-			if ( $use_subdomains ) {
-				$install_options[] = '--subdomains';
-			}
 
 			$install_failed = $cli->run( new ArrayInput( [
 				'subcommand' => 'cli',
-				'options' => $install_options,
+				'options' => [
+					'core',
+					'multisite-install',
+					'--title=' . ( $server_config['title'] ?? 'VIP Project' ),
+					'--admin_user=admin',
+					'--admin_password=password',
+					'--admin_email=no-reply@' . $hostname,
+					'--skip-email',
+					'--skip-config',
+					'--quiet',
+				],
 			] ), $output );
 
 			// Check install was successful.

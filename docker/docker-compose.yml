@@ -51,6 +51,8 @@ x-php: &php
     PHP_IDE_CONFIG: serverName=${HTTP_HOST:-default}
     # Enables XDebug for all processes and allows setting remote_host externally for Linux support
     XDEBUG_CONFIG: idekey=${HTTP_HOST:-default} remote_host=${XDEBUG_REMOTE_HOST:-host.docker.internal}
+    # Pass through subdomains configuration into PHP
+    SUBDOMAIN_INSTALL: ${SUBDOMAIN_INSTALL}
 
 x-analytics: &analytics
   ports:
