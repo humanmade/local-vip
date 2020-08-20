@@ -88,7 +88,7 @@ EOT
 			'cd %s; VOLUME=%s COMPOSE_PROJECT_NAME=%s',
 			'vendor/humanmade/local-vip/docker',
 			escapeshellarg( getcwd() ),
-			$this->get_project_subdomain()
+			$this->get_project_name()
 		);
 	}
 
@@ -139,7 +139,7 @@ EOT
 	protected function get_env() : array {
 		return [
 			'VOLUME' => getcwd(),
-			'COMPOSE_PROJECT_NAME' => $this->get_project_subdomain(),
+			'COMPOSE_PROJECT_NAME' => $this->get_project_name(),
 			'PATH' => getenv( 'PATH' ),
 			'ES_MEM_LIMIT' => getenv( 'ES_MEM_LIMIT' ) ?: '1g',
 		];
@@ -199,20 +199,30 @@ EOT
 			],
 		] ), $output ) === 0;
 
+		$server_config = $this->get_server_config();
+		$use_subdomains = ( $server_config['subdomains'] ?? false ) !== false;
+		$hostname = $this->get_project_hostname();
+
 		if ( ! $is_installed ) {
+			$install_options = [
+				'core',
+				'multisite-install',
+				'--title=' . ( $server_config['title'] ?? 'VIP Project' ),
+				'--admin_user=admin',
+				'--admin_password=password',
+				'--admin_email=no-reply@' . $hostname,
+				'--skip-email',
+				'--skip-config',
+				'--quiet',
+			];
+
+			if ( $use_subdomains ) {
+				$install_options[] = '--subdomains';
+			}
+
 			$install_failed = $cli->run( new ArrayInput( [
 				'subcommand' => 'cli',
-				'options' => [
-					'core',
-					'multisite-install',
-					'--title=VIP Project',
-					'--admin_user=admin',
-					'--admin_password=password',
-					'--admin_email=no-reply@' . $this->get_project_subdomain() . '.local',
-					'--skip-email',
-					'--skip-config',
-					// '--quiet',
-				],
+				'options' => $install_options,
 			] ), $output );
 
 			// Check install was successful.
@@ -221,12 +231,39 @@ EOT
 				return $install_failed;
 			}
 
+			$sites = $server_config['sites'] ?? [];
+			if ( is_array( $sites ) && ! empty( $sites ) ) {
+				foreach ( $sites as $title => $slug ) {
+					if ( ! is_string( $slug ) ) {
+						continue;
+					}
+					$site_options = [
+						'site',
+						'create',
+						'--slug=' . preg_replace( '/[^A-Za-z0-9\-\_]/', '', $slug ),
+					];
+					if ( is_string( $title ) ) {
+						$site_options[] = '--title=' . $title;
+					}
+					$site_creation_failed = $cli->run( new ArrayInput( [
+						'subcommand' => 'cli',
+						'options' => $site_options,
+					] ), $output );
+
+					if ( $site_creation_failed ) {
+						$output->writeLn( '<warning>Failed to create network site %s</>', $slug );
+					} else {
+						$output->writeln( '<info>Created network site %s</>', $slug );
+					}
+				}
+			}
+
 			$output->writeln( '<info>Installed database.</>' );
 			$output->writeln( '<info>WP Username:</>	<comment>admin</>' );
 			$output->writeln( '<info>WP Password:</>	<comment>password</>' );
 		}
 
-		$site_url = 'https://' . $this->get_project_subdomain() . '.altis.dev/';
+		$site_url = 'https://' . $this->get_project_hostname();
 		$output->writeln( '<info>Startup completed.</>' );
 		$output->writeln( '<info>To access your site visit:</> <comment>' . $site_url . '</>' );
 
@@ -334,7 +371,7 @@ EOT
 	 * @return int
 	 */
 	protected function exec( InputInterface $input, OutputInterface $output, ?string $program = null ) {
-		$site_url = 'https://' . $this->get_project_subdomain() . '.altis.dev/';
+		$site_url = 'https://' . $this->get_project_hostname();
 		$options = $input->getArgument( 'options' );
 
 		$passed_url = false;
@@ -364,7 +401,7 @@ EOT
 			}
 		}
 
-		$container_id = exec( sprintf( 'docker ps --filter name=%s_php_1 -q', $this->get_project_subdomain() ) );
+		$container_id = exec( sprintf( 'docker ps --filter name=%s_php_1 -q', $this->get_project_name() ) );
 		if ( ! $container_id ) {
 			$output->writeln( '<error>PHP container not found to run command.</>' );
 			return 1;
@@ -492,7 +529,7 @@ EOT;
 				foreach ( $connection_data as $field_name => $field_value ) {
 					$spf_file_contents = preg_replace( "/(<%=\s)($field_name)(\s%>)/i", $field_value, $spf_file_contents );
 				}
-				$output_file_path = sprintf( '/tmp/%s.spf', $this->get_project_subdomain() );
+				$output_file_path = sprintf( '/tmp/%s.spf', $this->get_project_name() );
 				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 				file_put_contents( $output_file_path, $spf_file_contents );
 
@@ -585,7 +622,7 @@ EOT;
 			$columns,
 			$lines,
 			getcwd(),
-			$this->get_project_subdomain(),
+			$this->get_project_name(),
 			escapeshellcmd( $command )
 		);
 
@@ -595,9 +632,9 @@ EOT;
 	}
 
 	/**
-	 * Get the name of the project for the local subdomain
+	 * Get the local-vip configuration object from the composer.json
 	 *
-	 * @return string
+	 * @return array
 	 */
 	protected function get_server_config() : string {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
@@ -609,17 +646,15 @@ EOT;
 	}
 
 	/**
-	 * Get the name of the project for the local subdomain
+	 * Get the name of the project
 	 *
 	 * @return string
 	 */
-	protected function get_project_subdomain() : string {
-		$config = $this->get_server_config();
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$composer_json = json_decode( file_get_contents( getcwd() . '/composer.json' ), true );
+	protected function get_project_name() : string {
+		$server_config = $this->get_server_config();
 
-		if ( isset( $config['name'] ) ) {
-			$project_name = $config['name'];
+		if ( isset( $server_config['name'] ) ) {
+			$project_name = $server_config['name'];
 		} else {
 			$project_name = basename( getcwd() );
 		}
@@ -628,21 +663,18 @@ EOT;
 	}
 
 	/**
-	 * Get the name of the project for the local subdomain
+	 * Get the full hostname of the project
 	 *
 	 * @return string
 	 */
 	protected function get_project_hostname() : string {
+		$server_config = $this->get_server_config();
 
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$composer_json = json_decode( file_get_contents( getcwd() . '/composer.json' ), true );
-
-		if ( isset( $composer_json['extra']['altis']['modules']['local-server']['name'] ) ) {
-			$project_name = $composer_json['extra']['altis']['modules']['local-server']['name'];
-		} else {
-			$project_name = basename( getcwd() );
+		if ( isset( $server_config['host'] ) ) {
+			return preg_replace( '/[^A-Za-z0-9\-\_.]/', '', $$server_config['host'] );
 		}
 
-		return preg_replace( '/[^A-Za-z0-9\-\_]/', '', $project_name );
+		// Use {configured project name or project directory name}.local as fallback.
+		return $this->get_project_name() . '.local';
 	}
 }
