@@ -82,10 +82,7 @@ services:
 
   php:
     <<: *php
-    build:
-      context: ./php
-      args:
-        BASE_PHP_IMAGE: ${PHP_IMAGE:-humanmade/altis-local-server-php:3.2.0}
+    image: ${PHP_IMAGE:-humanmade/altis-local-server-php:latest}
 
   nginx:
     image: humanmade/altis-local-server-nginx:3.1.0
