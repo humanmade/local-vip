@@ -174,7 +174,7 @@ EOT
 
 		$env = $this->get_env();
 		if ( $input->getOption( 'xdebug' ) ) {
-			$env['PHP_IMAGE'] = 'humanmade/altis-local-server-php:3.2.0-dev';
+			$env['PHP_IMAGE'] = 'humanmade/altis-local-server-php:3.3.0-dev';
 			if ( in_array( php_uname( 's' ), [ 'BSD', 'Linux', 'Solaris', 'Unknown' ], true ) ) {
 				$env['XDEBUG_REMOTE_HOST'] = '172.17.0.1';
 			}
@@ -204,7 +204,6 @@ EOT
 			],
 		] ), $output ) === 0;
 
-
 		if ( ! $is_installed ) {
 			$server_config = $this->get_server_config();
 			$hostname = $this->get_project_hostname();
@@ -229,8 +228,6 @@ EOT
 				$output->writeln( sprintf( '<error>WordPress install failed. Exited with error code %d</>', $install_failed ) );
 				return $install_failed;
 			}
-
-			$output->writeln( '<info>Installed database.</>' );
 
 			$sites = $server_config['sites'] ?? [];
 			if ( is_array( $sites ) && ! empty( $sites ) ) {
