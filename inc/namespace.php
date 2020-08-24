@@ -39,14 +39,6 @@ function bootstrap() {
 	add_filter( 'qm/output/file_path_map', __NAMESPACE__ . '\\set_file_path_map', 1 );
 }
 
-// In altis/local-server this code is triggered as an Altis module. Without
-// framework available, we need to kick this off manually.
-/* phpcs:disable PSR1.Files.SideEffects */
-if ( ENV_ARCHITECTURE === 'local-server' ) {
-	bootstrap();
-}
-/* phpcs:enable PSR1.Files.SideEffects */
-
 /**
  * Enables Query Monitor to map paths to their original values on the host.
  *

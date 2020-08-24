@@ -21,8 +21,7 @@
 			"inc/"
 		],
 		"files": [
-			"wp-config.php",
-			"inc/namespace.php"
+			"local-vip.php"
 		]
 	}
 }
