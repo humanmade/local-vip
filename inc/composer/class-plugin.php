@@ -54,10 +54,16 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface {
 	}
 
 	/**
-	 * Install additional files to the project on update / install
+	 * Install additional files to the project on update / install.
+	 *
+	 * Derived from humanmade/altis-cms-installer.
 	 */
 	public function install_files() {
+		$source = $this->composer->getConfig()->get( 'vendor-dir' ) . '/humanmade/local-vip';
 		$dest   = dirname( $this->composer->getConfig()->get( 'vendor-dir' ) );
+
+		copy( $source . '/index.php', $dest . '/index.php' );
+		copy( $source . '/wp-config.php', $dest . '/wp-config.php' );
 
 		// Update the .gitignore to include the wp-config.php, WordPress, the index.php
 		// as these files should not be included in VCS.
