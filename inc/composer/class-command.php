@@ -70,15 +70,6 @@ EOT
 	}
 
 	/**
-	 * Whether the command is proxied.
-	 *
-	 * @return boolean
-	 */
-	public function isProxyCommand() {
-		return true;
-	}
-
-	/**
 	 * Get the common docker-composer command prefix.
 	 *
 	 * @return string
@@ -159,18 +150,6 @@ EOT
 	 */
 	protected function start( InputInterface $input, OutputInterface $output ) {
 		$output->writeln( '<info>Starting...</>' );
-
-		$proxy = new Process( 'docker-compose -f proxy.yml up -d', 'vendor/humanmade/local-vip/docker' );
-		$proxy->setTimeout( 0 );
-		$proxy->setTty( true );
-		$proxy_failed = $proxy->run( function ( $type, $buffer ) {
-			echo $buffer;
-		} );
-
-		if ( $proxy_failed ) {
-			$output->writeln( '<error>Could not start traefik proxy.</>' );
-			return $proxy_failed;
-		}
 
 		$env = $this->get_env();
 		if ( $input->getOption( 'xdebug' ) ) {
@@ -277,9 +256,6 @@ EOT
 	protected function stop( InputInterface $input, OutputInterface $output ) {
 		$output->writeln( '<info>Stopping...</>' );
 
-		$proxy = new Process( 'docker-compose stop', 'vendor/humanmade/local-vip/docker', $this->get_env() );
-		$proxy->run();
-
 		$compose = new Process( 'docker-compose stop', 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		$return_val = $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
@@ -310,9 +286,6 @@ EOT
 
 		$output->writeln( '<error>Destroying...</>' );
 
-		$proxy = new Process( 'docker-compose down -v', 'vendor/humanmade/local-vip/docker', $this->get_env() );
-		$proxy->run();
-
 		$compose = new Process( 'docker-compose down -v', 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		$return_val = $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
@@ -336,9 +309,6 @@ EOT
 	 */
 	protected function restart( InputInterface $input, OutputInterface $output ) {
 		$output->writeln( '<info>Restarting...</>' );
-
-		$proxy = new Process( 'docker-compose restart', 'vendor/humanmade/local-vip/docker', $this->get_env() );
-		$proxy->run();
 
 		$options = $input->getArgument( 'options' );
 		if ( isset( $options[0] ) ) {

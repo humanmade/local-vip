@@ -25,7 +25,6 @@ x-php: &php
     - "${PWD}/php.ini:/usr/local/etc/php/conf.d/zzz-vip.ini"
     - socket:/var/run/php-fpm
   networks:
-    - proxy
     - default
   environment:
     COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME:-default}
@@ -54,7 +53,6 @@ x-analytics: &analytics
   ports:
     - "3000"
   networks:
-    - proxy
     - default
   restart: unless-stopped
 
@@ -87,21 +85,18 @@ services:
   nginx:
     image: humanmade/altis-local-server-nginx:3.1.0
     networks:
-      - proxy
       - default
     depends_on:
       - php
     volumes:
       - "${VOLUME}:/usr/src/app:delegated"
       - socket:/var/run/php-fpm
+      # Override image's own nginx.conf with our adaptation.
+      - "${PWD}/conf/nginx.conf:/etc/nginx/nginx.conf"
     ports:
-      - "8080"
-    labels:
-      - "traefik.frontend.priority=1"
-      - "traefik.port=8080"
-      - "traefik.protocol=https"
-      - "traefik.docker.network=proxy"
-      - "traefik.frontend.rule=HostRegexp:${HTTP_HOST:-default},{subdomain:[a-z._-]+}.${HTTP_HOST:-default}"
+      - "443:8443"
+      - "80:8080"
+
   xray:
     image: amazon/aws-xray-daemon:3.0.1
     ports:
@@ -124,18 +119,12 @@ services:
     ports:
       - "9200"
     networks:
-      - proxy
       - default
     healthcheck:
       test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 25
-    labels:
-      - "traefik.port=9200"
-      - "traefik.protocol=http"
-      - "traefik.docker.network=proxy"
-      - "traefik.frontend.rule=HostRegexp:elasticsearch-${HTTP_HOST:-default}"
     environment:
       - http.max_content_length=10mb
 
@@ -152,28 +141,17 @@ services:
       - "8025"
       - "1025"
     networks:
-      - proxy
       - default
-    labels:
-      - "traefik.port=8025"
-      - "traefik.protocol=http"
-      - "traefik.docker.network=proxy"
-      - "traefik.frontend.rule=Host:${HTTP_HOST:-default};PathPrefix:/mailhog"
     environment:
       MH_UI_WEB_PATH: mailhog
 
   kibana:
     image: blacktop/kibana:6.3
     networks:
-      - proxy
+      # - proxy
       - default
     ports:
       - "5601"
-    labels:
-      - "traefik.port=5601"
-      - "traefik.protocol=http"
-      - "traefik.docker.network=proxy"
-      - "traefik.frontend.rule=Host:${HTTP_HOST:-default};PathPrefix:/kibana"
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -182,9 +160,6 @@ services:
 
 networks:
   default:
-  proxy:
-    external:
-      name: proxy
 
 volumes:
   db-data:
