@@ -12,7 +12,8 @@
 	],
 	"require": {
 		"php": ">=7.1",
-		"composer-plugin-api": "^1.1"
+		"composer-plugin-api": "^1.1",
+		"humanmade/wordpress-pecl-memcached-object-cache": "^2.0"
 	},
 	"extra": {
 		"class": "HM\\Local_VIP\\Composer\\Plugin"

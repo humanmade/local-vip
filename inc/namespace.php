@@ -43,6 +43,9 @@ function bootstrap() {
 	}
 
 	add_filter( 'qm/output/file_path_map', __NAMESPACE__ . '\\set_file_path_map', 1 );
+
+	// Configure PECL Memcached integration to load on a very early hook.
+	add_action( 'enable_wp_debug_mode_checks', __NAMESPACE__ . '\\load_object_cache_memcached' );
 }
 
 /**
@@ -51,6 +54,18 @@ function bootstrap() {
  */
 function is_subdomain_install() : bool {
 	return in_array( getenv( 'SUBDOMAIN_INSTALL' ), [ true, 1 ] );
+}
+
+/**
+ * Load the Memcached Object Cache dropin.
+ * Borrowed from humanmade/altis-cloud.
+ */
+function load_object_cache_memcached() {
+	wp_using_ext_object_cache( true );
+	require dirname( ABSPATH ) . '/vendor/humanmade/wordpress-pecl-memcached-object-cache/object-cache.php';
+
+	// cache must be initted once it's included, else we'll get a fatal.
+	wp_cache_init();
 }
 
 /**
