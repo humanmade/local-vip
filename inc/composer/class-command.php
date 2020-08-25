@@ -214,7 +214,7 @@ EOT
 					'core',
 					'multisite-install',
 					'--title=' . ( $server_config['title'] ?? 'VIP Project' ),
-					'--admin_user=admin',
+					'--admin_user=wordpress',
 					'--admin_password=password',
 					'--admin_email=no-reply@' . $hostname,
 					'--skip-email',
@@ -257,7 +257,7 @@ EOT
 				}
 			}
 
-			$output->writeln( '<info>WP Username:</>	<comment>admin</>' );
+			$output->writeln( '<info>WP Username:</>	<comment>wordpress</>' );
 			$output->writeln( '<info>WP Password:</>	<comment>password</>' );
 		}
 

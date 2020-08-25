@@ -20,7 +20,7 @@ Once the initial download and install has completed, you should see the output:
 
 ```sh
 Installed database.
-WP Username:	admin
+WP Username:	wordpress
 WP Password:	password
 Startup completed.
 To access your site visit: https://my-site.local/
