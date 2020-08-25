@@ -15,17 +15,6 @@ namespace HM\Local_VIP\CLI;
 use WP_CLI;
 
 /**
- * Define initial install constant.
- *
- * @return void
- */
-function bootstrap() {
-	if ( is_initial_install() ) {
-		define( 'WP_INITIAL_INSTALL', true );
-	}
-}
-
-/**
  * Check if the current process is the initial WordPress installation.
  *
  * @return boolean

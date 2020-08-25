@@ -19,4 +19,3 @@ if ( defined( 'PHP_SAPI' ) && PHP_SAPI === 'cli' ) {
 
 // Initialize server logic.
 HM\Local_VIP\bootstrap();
-HM\Local_VIP\CLI\bootstrap();

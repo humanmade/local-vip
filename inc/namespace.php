@@ -20,7 +20,13 @@ function bootstrap() {
 		$_SERVER['HTTP_HOST'] = getenv( 'COMPOSE_PROJECT_NAME' ) . '.local';
 	}
 
-	if ( in_array( getenv( 'SUBDOMAIN_INSTALL' ), [ true, 1 ] ) ) {
+	// Use logic borrowed from altis/cms to determine if we should set the
+	// WP_INITIAL_INSTALL constant.
+	if ( CLI\is_initial_install() ) {
+		define( 'WP_INITIAL_INSTALL', true );
+	}
+
+	if ( ! CLI\is_initial_install() && is_subdomain_install() ) {
 		define( 'SUBDOMAIN_INSTALL', 1 );
 	}
 
@@ -37,6 +43,14 @@ function bootstrap() {
 	}
 
 	add_filter( 'qm/output/file_path_map', __NAMESPACE__ . '\\set_file_path_map', 1 );
+}
+
+/**
+ * Check an environment variable to determine if the server believes itself to
+ * be a WordPress Multisite "Subdomain" install.
+ */
+function is_subdomain_install() : bool {
+	return in_array( getenv( 'SUBDOMAIN_INSTALL' ), [ true, 1 ] );
 }
 
 /**
