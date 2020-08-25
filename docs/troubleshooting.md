@@ -7,7 +7,6 @@ To get details on the running Local Server status and containers, run `composer 
 ```sh
         Name                        Command               State                  Ports
 -----------------------------------------------------------------------------------------------------
-my-site_cavalcade_1       /usr/local/bin/cavalcade         Up
 my-site_db_1              docker-entrypoint.sh mysqld      Up       0.0.0.0:32818->3306/tcp
 my-site_elasticsearch_1   /elastic-entrypoint.sh ela ...   Up       0.0.0.0:32821->9200/tcp, 9300/tcp
 my-site_nginx_1           nginx -g daemon off;             Up       80/tcp, 0.0.0.0:32823->8080/tcp

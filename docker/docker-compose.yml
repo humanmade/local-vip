@@ -111,13 +111,6 @@ services:
       AWS_SECRET_ACCESS_KEY: YOUR_SECRET_HERE
       AWS_REGION: us-east-1
 
-  cavalcade:
-    <<: *php
-    entrypoint:
-      - /usr/local/bin/cavalcade
-    user: "nobody:nobody"
-    restart: unless-stopped
-
   elasticsearch:
     image: humanmade/altis-local-server-elasticsearch:3.0.0
     ulimits:

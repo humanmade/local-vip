@@ -64,7 +64,7 @@ Server options can be configured via the `extra.local-vip` section in your compo
 * `composer server restart` - Restart the containers.
 * `composer server destroy` - Stops and destroys all containers.
 * `composer server status` - Displays the status of all containers.
-* `composer server logs <service>` - Tail the logs from a given service, defaults to `php`, available options are `nginx`, `php`, `db`, `cavalcade`, and `elasticsearch`.
+* `composer server logs <service>` - Tail the logs from a given service, defaults to `php`, available options are `nginx`, `php`, `db`, and `elasticsearch`.
 * `composer server shell` - Logs in to the PHP container.
 * `composer server cli -- <command>` - Runs a WP CLI command, you should omit the 'wp' for example `composer server cli -- info`
 * `composer server exec -- <command>` - Runs any command on the PHP container.
