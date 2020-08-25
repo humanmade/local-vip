@@ -58,7 +58,9 @@ x-analytics: &analytics
 
 services:
   db:
-    image: mysql:5.7
+    image: mariadb:10.2
+    cap_add:
+      - SYS_PTRACE
     volumes:
       - "db-data:/var/lib/mysql"
     ports:
