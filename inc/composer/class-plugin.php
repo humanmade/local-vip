@@ -65,6 +65,12 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface {
 		copy( $source . '/index.php', $dest . '/index.php' );
 		copy( $source . '/wp-config.php', $dest . '/wp-config.php' );
 
+		// Write in the dummy local-config.php if one does not exist already,
+		// but do not overwrite it if present (unlike wp-config and index).
+		if ( ! is_readable( $dest . '/local-config.php' ) ) {
+			copy( $source . '/local-config.php', $dest . '/local-config.php' );
+		}
+
 		// Update the .gitignore to include the wp-config.php, WordPress, the index.php
 		// as these files should not be included in VCS.
 		if ( ! is_readable( $dest . '/.gitignore' ) ) {
@@ -72,6 +78,7 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface {
 				'# Local Server',
 				'/wordpress',
 				'/index.php',
+				'/local-config.php',
 				'/wp-config.php',
 				'/vendor',
 				'/wp-content/uploads',
