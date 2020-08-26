@@ -15,6 +15,18 @@ namespace HM\Local_VIP\CLI;
 use WP_CLI;
 
 /**
+ * VaultPress and Jetpack scream into your debug log at the top of their lungs
+ * if they get loaded as mu-plugins before WP is installed. This happens
+ * during installation-related WP-CLI commands unless we use this hack to
+ * prevent all MU Plugins from loading.
+ *
+ * @return void
+ */
+function disable_mu_plugins() : void {
+	defined( 'WPMU_PLUGIN_DIR' ) or define( 'WPMU_PLUGIN_DIR', ABSPATH . 'should-not-exist-under-any-circumstances' );
+}
+
+/**
  * Check if the current process is the initial WordPress installation.
  *
  * @return boolean
@@ -42,11 +54,15 @@ function is_initial_install() : bool {
 		return false;
 	}
 
-	// Check it's an install related command.
+	// Check it's an install-related command.
 	$commands = [ 'is-installed', 'install', 'multisite-install', 'multisite-convert' ];
 	if ( ! in_array( $runner->arguments[1], $commands, true ) ) {
 		return false;
 	}
+
+	// If we're running an install command, misdeclare the WPMU_PLUGINS_DIR
+	// to prevent VIP's mu-plugins from loading.
+	disable_mu_plugins();
 
 	return true;
 }

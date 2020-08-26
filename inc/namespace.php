@@ -24,9 +24,7 @@ function bootstrap() {
 	// WP_INITIAL_INSTALL constant.
 	if ( CLI\is_initial_install() ) {
 		define( 'WP_INITIAL_INSTALL', true );
-	}
-
-	if ( ! CLI\is_initial_install() && is_subdomain_install() ) {
+	} else if ( is_subdomain_install() ) {
 		define( 'SUBDOMAIN_INSTALL', 1 );
 	}
 
