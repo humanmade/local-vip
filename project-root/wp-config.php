@@ -72,6 +72,11 @@ foreach ( $required_constants as $constant ) {
 	}
 }
 
+// Set up global to enable the memcached connection.
+global $memcached_servers;
+// "memcached" is the hostname of the relevant network container.
+$memcached_servers = [ [ 'memcached', 11211 ] ];
+
 if ( ! getenv( 'WP_PHPUNIT__TESTS_CONFIG' ) ) {
 	require_once ABSPATH . 'wp-settings.php';
 }
