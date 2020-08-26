@@ -26,6 +26,9 @@ function bootstrap() {
 		define( 'WP_INITIAL_INSTALL', true );
 	} else if ( is_subdomain_install() ) {
 		define( 'SUBDOMAIN_INSTALL', 1 );
+
+		// Configure PECL Memcached integration to load on a very early hook.
+		add_action( 'enable_wp_debug_mode_checks', __NAMESPACE__ . '\\load_object_cache_memcached' );
 	}
 
 	defined( 'DB_HOST' ) or define( 'DB_HOST', getenv( 'DB_HOST' ) );
@@ -41,9 +44,6 @@ function bootstrap() {
 	}
 
 	add_filter( 'qm/output/file_path_map', __NAMESPACE__ . '\\set_file_path_map', 1 );
-
-	// Configure PECL Memcached integration to load on a very early hook.
-	add_action( 'enable_wp_debug_mode_checks', __NAMESPACE__ . '\\load_object_cache_memcached' );
 }
 
 /**
