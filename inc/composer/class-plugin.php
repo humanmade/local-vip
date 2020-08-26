@@ -59,7 +59,7 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface {
 	 * Derived from humanmade/altis-cms-installer.
 	 */
 	public function install_files() {
-		$source = $this->composer->getConfig()->get( 'vendor-dir' ) . '/humanmade/local-vip';
+		$source = $this->composer->getConfig()->get( 'vendor-dir' ) . '/humanmade/local-vip/project-root';
 		$dest   = dirname( $this->composer->getConfig()->get( 'vendor-dir' ) );
 
 		copy( $source . '/index.php', $dest . '/index.php' );
