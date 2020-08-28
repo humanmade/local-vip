@@ -44,6 +44,8 @@ function bootstrap() {
 	}
 
 	add_filter( 'qm/output/file_path_map', __NAMESPACE__ . '\\set_file_path_map', 1 );
+
+	add_filter( 'pecl_memcached/warn_on_flush', '__return_false' );
 }
 
 /**
