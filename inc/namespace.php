@@ -11,14 +11,11 @@ namespace HM\Local_VIP;
  * Configure environment for local server.
  */
 function bootstrap() {
-	// Try reading HTTP Host from environment
-	if ( empty( $_SERVER['HTTP_HOST'] ) ) {
-		$_SERVER['HTTP_HOST'] = getenv( 'HTTP_HOST' );
-	}
-	// fall back to {project name}.local
-	if ( empty( $_SERVER['HTTP_HOST'] ) ) {
-		$_SERVER['HTTP_HOST'] = getenv( 'COMPOSE_PROJECT_NAME' ) . '.local';
-	}
+	// Determine HTTP_HOST.
+	add_filter( 'local_vip/http_host', __NAMESPACE__ . '\\Cron\\apply_cron_hostname', 1, 1 );
+	add_filter( 'local_vip/http_host', __NAMESPACE__ . '\\apply_env_hostname', 11, 1 );
+	add_filter( 'local_vip/http_host', __NAMESPACE__ . '\\apply_default_hostname', 20, 1 );
+	$_SERVER['HTTP_HOST'] = apply_filters( 'local_vip/http_host', $_SERVER['HTTP_HOST'] );
 
 	// Use logic borrowed from altis/cms to determine if we should set the
 	// WP_INITIAL_INSTALL constant.
@@ -46,6 +43,42 @@ function bootstrap() {
 	add_filter( 'qm/output/file_path_map', __NAMESPACE__ . '\\set_file_path_map', 1 );
 
 	add_filter( 'pecl_memcached/warn_on_flush', '__return_false' );
+
+	add_filter( 'cron_request', __NAMESPACE__ . '\\Cron\\filter_cron_url' );
+}
+
+/**
+ * Try reading HTTP_HOST value from an environment variable.
+ *
+ * @param string|bool $hostname HTTP_HOST value.
+ * @return string
+ */
+function apply_env_hostname( $hostname ) {
+	// Try reading HTTP Host from environment
+	if ( empty( $hostname ) ) {
+		$env_hostname = getenv( 'HTTP_HOST' );
+		if ( ! empty( $env_hostname ) ) {
+			return $env_hostname;
+		}
+	}
+	return $hostname;
+}
+
+/**
+ * Default HTTP_HOST to {project name}.local if not set. Hooked to
+ * 'local_vip/http_host' at a low priority.
+ *
+ * @param string|bool $hostname HTTP_HOST value.
+ * @return string
+ */
+function apply_default_hostname( $hostname ) {
+	if ( empty( $hostname ) ) {
+		$project_name = getenv( 'COMPOSE_PROJECT_NAME' );
+		if ( ! empty( $project_name ) ) {
+			return $project_name . '.local';
+		}
+	}
+	return $hostname;
 }
 
 /**

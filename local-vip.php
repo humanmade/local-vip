@@ -12,6 +12,7 @@
 
 require_once __DIR__ . '/inc/namespace.php';
 require_once __DIR__ . '/inc/cli.php';
+require_once __DIR__ . '/inc/cron.php';
 
 if ( defined( 'PHP_SAPI' ) && PHP_SAPI === 'cli' ) {
 	ini_set( 'display_errors', 'on' );
