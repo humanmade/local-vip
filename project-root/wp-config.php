@@ -77,6 +77,11 @@ global $memcached_servers;
 // "memcached" is the hostname of the relevant network container.
 $memcached_servers = [ [ 'memcached', 11211 ] ];
 
+// Load VIP configuration and constants.
+if ( is_readable( WP_CONTENT_DIR . '/vip-config/vip-config.php' ) ) {
+	require_once WP_CONTENT_DIR . '/vip-config/vip-config.php';
+}
+
 if ( ! getenv( 'WP_PHPUNIT__TESTS_CONFIG' ) ) {
 	require_once ABSPATH . 'wp-settings.php';
 }
