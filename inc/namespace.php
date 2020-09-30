@@ -36,6 +36,9 @@ function bootstrap() {
 	define( 'ELASTICSEARCH_HOST', getenv( 'ELASTICSEARCH_HOST' ) );
 	define( 'ELASTICSEARCH_PORT', getenv( 'ELASTICSEARCH_PORT' ) );
 
+	// Set "development" unless overridden in `local-config.php`.
+	defined( 'WP_ENVIRONMENT_TYPE' ) or define( 'WP_ENVIRONMENT_TYPE', 'development' );
+
 	if ( ! defined( 'AWS_XRAY_DAEMON_IP_ADDRESS' ) ) {
 		define( 'AWS_XRAY_DAEMON_IP_ADDRESS', gethostbyname( getenv( 'AWS_XRAY_DAEMON_HOST' ) ) );
 	}
