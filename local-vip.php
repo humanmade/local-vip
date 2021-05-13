@@ -18,5 +18,8 @@ if ( defined( 'PHP_SAPI' ) && PHP_SAPI === 'cli' ) {
 	ini_set( 'display_errors', 'on' );
 }
 
-// Initialize server logic.
-HM\Local_VIP\bootstrap();
+// If running WordPress.
+if ( function_exists( 'add_filter' ) ) {
+	// Initialize server logic.
+	HM\Local_VIP\bootstrap();
+}
