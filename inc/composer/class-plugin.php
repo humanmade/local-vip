@@ -8,7 +8,6 @@
 namespace HM\Local_VIP\Composer;
 
 use Composer\Composer;
-use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\Capable;
 use Composer\Plugin\PluginInterface;
@@ -18,7 +17,7 @@ use Composer\Plugin\PluginInterface;
  *
  * @package humanmade/local-vip
  */
-class Plugin implements PluginInterface, Capable, EventSubscriberInterface {
+class Plugin implements PluginInterface, Capable {
 	/**
 	 * Plugin activation callback.
 	 *
@@ -98,5 +97,25 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface {
 				mkdir( $dest . $required_directory );
 			}
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param Composer $composer Composer object.
+	 * @param IOInterface $io Composer disk interface.
+	 * @return void
+	 */
+	public function deactivate( Composer $composer, IOInterface $io ) {
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param Composer $composer Composer object.
+	 * @param IOInterface $io Composer disk interface.
+	 * @return void
+	 */
+	public function uninstall( Composer $composer, IOInterface $io ) {
 	}
 }
