@@ -17,7 +17,7 @@ use Composer\Plugin\PluginInterface;
  *
  * @package humanmade/local-vip
  */
-class Plugin implements PluginInterface, Capable {
+class Plugin implements PluginInterface, Capable, EventSubscriberInterface {
 	/**
 	 * Plugin activation callback.
 	 *
