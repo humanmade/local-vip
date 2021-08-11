@@ -480,7 +480,7 @@ EOT
 <info>Host</info>:           ${connection_data['HOST']}
 <info>Port</info>:           ${connection_data['PORT']}
 
-<comment>Version</comment>:        ${connection_data['MYSQL_VERSION']}
+<comment>Version</comment>:        ${connection_data['MARIADB_VERSION']}
 
 EOT;
 				$output->write( $db_info );
@@ -559,7 +559,7 @@ EOT;
 
 		// Retrieve the forwarded ports using Docker and the container ID.
 		$ports = shell_exec( sprintf( "$command_prefix docker ps --format '{{.Ports}}' --filter id=%s", $db_container_id ) );
-		preg_match( '/.*,\s([\d.]+):([\d]+)->.*/', $ports, $ports_matches );
+		preg_match( '/([\d.]+):([\d]+)->.*/', $ports, $ports_matches );
 
 		return array_merge(
 			array_filter( $values ),
