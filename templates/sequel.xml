@@ -65,7 +65,7 @@
 		<key>rdbms_type</key>
 		<string>mysql</string>
 		<key>rdbms_version</key>
-		<string><%= MYSQL_VERSION %></string>
+		<string><%= MARIADB_VERSION %></string>
 		<key>version</key>
 		<integer>1</integer>
 	</dict>
