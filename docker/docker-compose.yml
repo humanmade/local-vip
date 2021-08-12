@@ -85,7 +85,7 @@ services:
     image: ${PHP_IMAGE:-humanmade/altis-local-server-php:4.0.0}
 
   nginx:
-    image: humanmade/altis-local-server-nginx:4.0.0
+    image: humanmade/altis-local-server-nginx:3.1.0
     networks:
       - default
     depends_on:
