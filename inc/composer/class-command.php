@@ -153,7 +153,7 @@ EOT
 
 		$env = $this->get_env();
 		if ( $input->getOption( 'xdebug' ) ) {
-			$env['PHP_IMAGE'] = 'humanmade/altis-local-server-php:3.3.0-dev';
+			$env['PHP_IMAGE'] = 'humanmade/altis-local-server-php:4.0.0-dev';
 			if ( in_array( php_uname( 's' ), [ 'BSD', 'Linux', 'Solaris', 'Unknown' ], true ) ) {
 				$env['XDEBUG_REMOTE_HOST'] = '172.17.0.1';
 			}
