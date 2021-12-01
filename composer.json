@@ -16,7 +16,14 @@
 		"humanmade/wordpress-pecl-memcached-object-cache": "^2.1"
 	},
 	"extra": {
-		"class": "HM\\Local_VIP\\Composer\\Plugin"
+		"class": "HM\\Local_VIP\\Composer\\Plugin",
+		"altis": {
+			"modules": {
+				"local-server": {
+					"elasticsearch": "6.8"
+				}
+			}
+		}
 	},
 	"autoload": {
 		"classmap": [
