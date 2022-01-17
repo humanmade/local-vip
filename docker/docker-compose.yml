@@ -48,6 +48,11 @@ x-php: &php
     XDEBUG_CONFIG: idekey=${HTTP_HOST:-default} remote_host=${XDEBUG_REMOTE_HOST:-host.docker.internal}
     # Pass through subdomains configuration into PHP
     SUBDOMAIN_INSTALL: ${SUBDOMAIN_INSTALL}
+    # Set up VIP specific constants to use Enterprise Search
+    VIP_ELASTICSEARCH_ENDPOINT: 'http://elasticsearch:9200'
+    VIP_ELASTICSEARCH_USERNAME: elastic
+    VIP_ELASTICSEARCH_PASSWORD: elasticadmin
+    FILES_CLIENT_SITE_ID: 123
 
 x-analytics: &analytics
   ports:
@@ -109,7 +114,7 @@ services:
       AWS_REGION: us-east-1
 
   elasticsearch:
-    image: humanmade/altis-local-server-elasticsearch:3.0.0
+    image: humanmade/altis-local-server-elasticsearch:4.1.0
     ulimits:
       memlock:
         soft: -1

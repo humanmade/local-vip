@@ -36,6 +36,12 @@ function bootstrap() {
 	define( 'ELASTICSEARCH_HOST', getenv( 'ELASTICSEARCH_HOST' ) );
 	define( 'ELASTICSEARCH_PORT', getenv( 'ELASTICSEARCH_PORT' ) );
 
+	// Set up VIP specific constants to use Enterprise Search.
+	define( 'VIP_ELASTICSEARCH_ENDPOINTS', [ getenv( 'VIP_ELASTICSEARCH_ENDPOINT' ) ] );
+	define( 'VIP_ELASTICSEARCH_USERNAME', getenv( 'VIP_ELASTICSEARCH_USERNAME' ) );
+	define( 'VIP_ELASTICSEARCH_PASSWORD', getenv( 'VIP_ELASTICSEARCH_PASSWORD' ) );
+	define( 'FILES_CLIENT_SITE_ID', getenv( 'FILES_CLIENT_SITE_ID' ) ); // Mocks the site id on VIP.
+
 	// Set "development" unless overridden in `local-config.php`.
 	defined( 'WP_ENVIRONMENT_TYPE' ) or define( 'WP_ENVIRONMENT_TYPE', 'local' );
 
