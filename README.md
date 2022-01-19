@@ -28,3 +28,13 @@ composer server stop
 ```
 
 [For full documentation click here](./docs).
+
+## Enterprise Search
+
+Local VIP mimics VIP's Enterprise Search by using Elastic Search with mock variables to simulate a VIP environment.
+
+Once the environment is created you can confirm the ES instances is running via Kibana at [http://127.0.0.1:63917/kibana/app/kibana#/](http://127.0.0.1:63917/kibana/app/kibana#/)
+
+In addition you can check the health of the environment in the Kibana console [http://127.0.0.1:63917/kibana/app/kibana#/dev_tools/console?_g=()](http://127.0.0.1:63917/kibana/app/kibana#/dev_tools/console?_g=()]) by executing `GET _cluster/health?pretty`.
+
+In order to leverage ES, the data needs to be indexed. By default, there is no data indexed in the ES environment. To index the data, use WP CLI and execute `wp vip-search index --setup`.
