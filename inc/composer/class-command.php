@@ -78,6 +78,8 @@ EOT
 			->addOption( 'xdebug', null, InputOption::VALUE_OPTIONAL, 'Start the server with Xdebug', 'debug' )
 			->addOption( 'mutagen', null, InputOption::VALUE_NONE, 'Start the server with Mutagen file sharing' )
 			->addOption( 'clean', null, InputOption::VALUE_NONE, 'Remove or stop the proxy container when destroying or stopping the server' );
+
+		require getcwd() . '/vendor/humanmade/local-vip/vendor/autoload.php';
 	}
 
 	/**
