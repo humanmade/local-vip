@@ -84,9 +84,6 @@ class Docker_Compose_Generator {
 				'db' => [
 					'condition' => 'service_healthy',
 				],
-				'redis' => [
-					'condition' => 'service_started',
-				],
 				'mailhog' => [
 					'condition' => 'service_started',
 				],
@@ -97,8 +94,6 @@ class Docker_Compose_Generator {
 			],
 			'external_links' => [
 				"proxy:{$this->hostname}",
-				"proxy:pinpoint-{$this->hostname}",
-				"proxy:cognito-{$this->hostname}",
 				"proxy:elasticsearch-{$this->hostname}",
 			],
 			'volumes' => [
@@ -118,8 +113,6 @@ class Docker_Compose_Generator {
 				'DB_PASSWORD' => 'wordpress',
 				'DB_NAME' => 'wordpress',
 				'DB_USER' => 'wordpress',
-				'REDIS_HOST' => 'redis',
-				'REDIS_PORT' => 6379,
 				'WP_DEBUG' => 1,
 				'WP_DEBUG_DISPLAY' => 0,
 				'PAGER' => 'more',
@@ -129,8 +122,6 @@ class Docker_Compose_Generator {
 				'ELASTICSEARCH_PORT' => 9200,
 				'AWS_XRAY_DAEMON_HOST' => 'xray',
 				'PHP_SENDMAIL_PATH' => '/usr/sbin/sendmail -t -i -S mailhog:1025',
-				'ALTIS_ANALYTICS_PINPOINT_ENDPOINT' => "https://pinpoint-{$this->hostname}",
-				'ALTIS_ANALYTICS_COGNITO_ENDPOINT' => "https://cognito-{$this->hostname}",
 				// Enables XDebug for all processes and allows setting remote_host externally for Linux support.
 				'XDEBUG_CONFIG' => sprintf(
 					'client_host=%s',
@@ -174,27 +165,6 @@ class Docker_Compose_Generator {
 	}
 
 	/**
-	 * Get the Cavalcade service.
-	 *
-	 * @return array
-	 */
-	protected function get_service_cavalcade() : array {
-		return [
-			'cavalcade' => array_merge(
-				[
-					'container_name' => "{$this->project_name}-cavalcade",
-					'entrypoint' => [
-						'/usr/local/bin/cavalcade',
-					],
-					'user' => 'nobody:nobody',
-					'restart' => 'unless-stopped',
-				],
-				$this->get_php_reusable()
-			),
-		];
-	}
-
-	/**
 	 * Get the nginx service.
 	 *
 	 * @return array
@@ -230,23 +200,6 @@ class Docker_Compose_Generator {
 					'GZIP_STATUS' => 'on',
 					// Increase read response timeout when debugging.
 					'READ_TIMEOUT' => ( $this->args['xdebug'] ?? 'off' ) !== 'off' ? '9000s' : '60s',
-				],
-			],
-		];
-	}
-
-	/**
-	 * Get the Redis service.
-	 *
-	 * @return array
-	 */
-	protected function get_service_redis() : array {
-		return [
-			'redis' => [
-				'image' => 'redis:3.2-alpine',
-				'container_name' => "{$this->project_name}-redis",
-				'ports' => [
-					'6379',
 				],
 			],
 		];
@@ -448,55 +401,6 @@ class Docker_Compose_Generator {
 	}
 
 	/**
-	 * Get the Analytics services.
-	 *
-	 * @return array
-	 */
-	protected function get_service_analytics() : array {
-		return [
-			'cognito' => [
-				'container_name' => "{$this->project_name}-cognito",
-				'ports' => [
-					'3000',
-				],
-				'networks' => [
-					'proxy',
-					'default',
-				],
-				'restart' => 'unless-stopped',
-				'image' => 'humanmade/local-cognito:1.1.0',
-				'labels' => [
-					'traefik.port=3000',
-					'traefik.protocol=http',
-					'traefik.docker.network=proxy',
-					"traefik.frontend.rule=Host:cognito-{$this->hostname}",
-				],
-			],
-			'pinpoint' => [
-				'container_name' => "{$this->project_name}-pinpoint",
-				'ports' => [
-					'3000',
-				],
-				'networks' => [
-					'proxy',
-					'default',
-				],
-				'restart' => 'unless-stopped',
-				'image' => 'humanmade/local-pinpoint:1.3.0',
-				'labels' => [
-					'traefik.port=3000',
-					'traefik.protocol=http',
-					'traefik.docker.network=proxy',
-					"traefik.frontend.rule=Host:pinpoint-{$this->hostname}",
-				],
-				'environment' => [
-					'INDEX_ROTATION' => 'OneDay',
-				],
-			],
-		];
-	}
-
-	/**
 	 * Get the XRay service.
 	 *
 	 * @return array
@@ -526,17 +430,12 @@ class Docker_Compose_Generator {
 	public function get_array() : array {
 		$services = array_merge(
 			$this->get_service_db(),
-			$this->get_service_redis(),
 			$this->get_service_php(),
 			$this->get_service_nginx()
 		);
 
 		if ( $this->get_config()['xray'] ) {
 			$services = array_merge( $services, $this->get_service_xray() );
-		}
-
-		if ( $this->get_config()['cavalcade'] ) {
-			$services = array_merge( $services, $this->get_service_cavalcade() );
 		}
 
 		if ( $this->get_config()['elasticsearch'] ) {
@@ -547,10 +446,6 @@ class Docker_Compose_Generator {
 			$services,
 			$this->get_service_mailhog()
 		);
-
-		if ( $this->get_config()['analytics'] && $this->get_config()['elasticsearch'] ) {
-			$services = array_merge( $services, $this->get_service_analytics() );
-		}
 
 		if ( $this->get_config()['kibana'] && $this->get_config()['elasticsearch'] ) {
 			$services = array_merge( $services, $this->get_service_kibana() );
@@ -629,8 +524,6 @@ class Docker_Compose_Generator {
 
 		$config = ( $composer_json['extra']['altis']['modules'][ $module ] ?? [] );
 		$defaults = [
-			'analytics' => true,
-			'cavalcade' => true,
 			'elasticsearch' => '7',
 			'kibana' => true,
 			'xray' => true,
