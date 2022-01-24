@@ -79,7 +79,7 @@ EOT
 			->addOption( 'mutagen', null, InputOption::VALUE_NONE, 'Start the server with Mutagen file sharing' )
 			->addOption( 'clean', null, InputOption::VALUE_NONE, 'Remove or stop the proxy container when destroying or stopping the server' );
 
-		require getcwd() . '/vendor/humanmade/local-vip/vendor/autoload.php';
+		require getcwd() . '/vendor/autoload.php';
 	}
 
 	/**
@@ -746,22 +746,6 @@ EOT;
 		}
 
 		return preg_replace( '/[^A-Za-z0-9\-\_]/', '', $project_name );
-	}
-
-	/**
-	 * Get the full hostname of the project
-	 *
-	 * @return string
-	 */
-	protected function get_project_hostname() : string {
-		$server_config = $this->get_server_config();
-
-		if ( isset( $server_config['host'] ) ) {
-			return preg_replace( '/[^A-Za-z0-9\-\_.]/', '', $server_config['host'] );
-		}
-
-		// Use {configured project name or project directory name}.local as fallback.
-		return $this->get_project_name() . '.local';
 	}
 
 	/**
