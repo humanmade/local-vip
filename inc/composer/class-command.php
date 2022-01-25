@@ -101,7 +101,7 @@ EOT
 			'cd %s; VOLUME=%s COMPOSE_PROJECT_NAME=%s',
 			'vendor/humanmade/local-vip/docker',
 			escapeshellarg( getcwd() ),
-			$this->get_project_subdomain()
+			$this->get_project_name()
 		);
 	}
 
@@ -177,7 +177,8 @@ EOT
 	protected function get_env() : array {
 		return [
 			'VOLUME' => getcwd(),
-			'COMPOSE_PROJECT_NAME' => $this->get_project_subdomain(),
+			'COMPOSE_PROJECT_NAME' => $this->get_project_name(),
+			'COMPOSE_PROJECT_TLD' => '.local',
 			'DOCKER_CLIENT_TIMEOUT' => 120,
 			'COMPOSE_HTTP_TIMEOUT' => 120,
 			'PATH' => getenv( 'PATH' ),
@@ -236,7 +237,7 @@ EOT
 
 		if ( ! $is_installed ) {
 			$server_config = $this->get_server_config();
-			$hostname = $this->get_project_subdomain() . '.local';
+			$hostname = $this->get_project_domain() . '.local';
 
 			$install_failed = $cli->run( new ArrayInput( [
 				'subcommand' => 'cli',
@@ -291,7 +292,7 @@ EOT
 			$output->writeln( '<info>WP Password:</>	<comment>password</>' );
 		}
 
-		$site_url = 'https://' . $this->get_project_subdomain() . '.local/';
+		$site_url = 'https://' . $this->get_project_domain() . '.local/';
 		$output->writeln( '<info>Startup completed.</>' );
 		$output->writeln( '<info>To access your site visit:</> <comment>' . $site_url . '</>' );
 
@@ -435,7 +436,7 @@ EOT
 	 * @return int
 	 */
 	protected function exec( InputInterface $input, OutputInterface $output, ?string $program = null ) {
-		$site_url = 'https://' . $this->get_project_subdomain() . '.local/';
+		$site_url = 'https://' . $this->get_project_domain() . '.local/';
 		$options = $input->getArgument( 'options' );
 
 		$passed_url = false;
@@ -465,7 +466,7 @@ EOT
 			}
 		}
 
-		$container_id = exec( sprintf( 'docker ps --filter name=%s-php -q', $this->get_project_subdomain() ) );
+		$container_id = exec( sprintf( 'docker ps --filter name=%s-php -q', $this->get_project_name() ) );
 		if ( ! $container_id ) {
 			$output->writeln( '<error>PHP container not found to run command.</>' );
 			$output->writeln( '<info>You may need to run `composer server start` again if you have recently updated Docker.</>' );
@@ -575,7 +576,7 @@ EOT
 			'docker exec -it -u root -e COLUMNS=%d -e LINES=%d -e MYSQL_PWD=wordpress %s-db',
 			$columns,
 			$lines,
-			$this->get_project_subdomain()
+			$this->get_project_name()
 		);
 
 		$return_val = 0;
@@ -612,7 +613,7 @@ EOT;
 				foreach ( $connection_data as $field_name => $field_value ) {
 					$spf_file_contents = preg_replace( "/(<%=\s)($field_name)(\s%>)/i", $field_value, $spf_file_contents );
 				}
-				$output_file_path = sprintf( '/tmp/%s.spf', $this->get_project_subdomain() );
+				$output_file_path = sprintf( '/tmp/%s.spf', $this->get_project_name() );
 				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 				file_put_contents( $output_file_path, $spf_file_contents );
 
@@ -653,7 +654,12 @@ EOT;
 	 * @return void
 	 */
 	protected function generate_docker_compose( array $args = [] ) : void {
-		$docker_compose = new Docker_Compose_Generator( $this->get_project_subdomain(), getcwd(), $args );
+		$docker_compose = new Docker_Compose_Generator(
+			$this->get_project_name(),
+			$this->get_project_domain(),
+			getcwd(),
+			$args
+		);
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 		file_put_contents(
 			getcwd() . DIRECTORY_SEPARATOR . 'vendor/humanmade/local-vip/docker' . DIRECTORY_SEPARATOR . 'docker-compose.yml',
@@ -749,12 +755,20 @@ EOT;
 	}
 
 	/**
-	 * Get the name of the project for the local subdomain
+	 * Get the name of the project for the local domain
 	 *
 	 * @return string
 	 */
-	protected function get_project_subdomain() : string {
-		return $this->get_project_name();
+	protected function get_project_domain() : string {
+		$server_config = $this->get_server_config();
+
+		if ( isset( $server_config['domain'] ) ) {
+			$project_domain = $server_config['domain'];
+		} else {
+			$project_domain = $this->get_project_name();	
+		}
+
+		return preg_replace( '/[^A-Za-z0-9\-\_]/', '', $project_domain );
 	}
 
 	/**

@@ -60,15 +60,16 @@ class Docker_Compose_Generator {
 	 * Create and configure the generator.
 	 *
 	 * @param string $project_name The docker compose project name.
+	 * @param string $domain_name The docker compose domain name.
 	 * @param string $root_dir The project root directory.
 	 * @param array $args An optional array of arguments to modify the behaviour of the generator.
 	 */
-	public function __construct( string $project_name, string $root_dir, array $args = [] ) {
+	public function __construct( string $project_name, string $domain_name, string $root_dir, array $args = [] ) {
 		$this->project_name = $project_name;
 		$this->root_dir = $root_dir;
 		$this->config_dir = dirname( __DIR__, 2 ) . '/docker';
 		$this->tld = 'local';
-		$this->hostname = $this->project_name . '.' . $this->tld;
+		$this->hostname = $domain_name . '.' . $this->tld;
 		$this->args = $args;
 	}
 
