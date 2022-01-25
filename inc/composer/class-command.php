@@ -184,6 +184,10 @@ EOT
 			'PATH' => getenv( 'PATH' ),
 			'ES_MEM_LIMIT' => getenv( 'ES_MEM_LIMIT' ) ?: '1g',
 			'HOME' => getenv( 'HOME' ),
+			// Pass subdomain config through to docker, and from there on to PHP.
+			// This is necessary to enable subdomains, because the --subdomains
+			// argument to multisite-install has no effect.
+			'SUBDOMAIN_INSTALL' => ( $this->get_server_config()['subdomains'] ?? false ) ? 1 : 0,
 		];
 	}
 
