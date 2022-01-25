@@ -88,6 +88,9 @@ class Docker_Compose_Generator {
 				'mailhog' => [
 					'condition' => 'service_started',
 				],
+				'memcached' => [
+					'condition' => 'service_started',
+				],
 			],
 			'image' => 'humanmade/altis-local-server-php:4.2.0',
 			'links' => [
@@ -244,6 +247,21 @@ class Docker_Compose_Generator {
 					'interval' => '5s',
 					'retries' => 10,
 				],
+			],
+		];
+	}
+
+	/**
+	 * Get the Memcached service.
+	 *
+	 * @return array
+	 */
+	protected function get_service_memcached() : array {
+		return [
+			'memcached' => [
+				'image' => 'memcached',
+				'container_name' => "{$this->project_name}-memcached",
+				'restart' => 'always',
 			],
 		];
 	}
@@ -432,6 +450,7 @@ class Docker_Compose_Generator {
 	public function get_array() : array {
 		$services = array_merge(
 			$this->get_service_db(),
+			$this->get_service_memcached(),
 			$this->get_service_php(),
 			$this->get_service_nginx()
 		);
