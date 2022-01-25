@@ -4,4 +4,7 @@ node_modules
 composer.lock
 vendor
 
+# This mustn't be committed
+docker/docker-compose.yml
+
 /*.crt
