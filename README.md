@@ -17,6 +17,19 @@ Local VIP can be installed as a dependency within a Composer-based WordPress pro
 
 ## Getting Started
 
+You will want to create your local environments SSL certs before starting. If your domain is `test.local`, then you would execute the following script.
+
+```
+local-vip » bash .bin/build-cert.sh test.local
+```
+
+Your local domains will need to be mapped within you hosts file. For example, if your domain is `test.local`, the following would need to be added to your hosts file.
+
+```
+# test.local
+127.0.0.1 test.local
+```
+
 In your local server project you can run the following commands:
 
 ```
