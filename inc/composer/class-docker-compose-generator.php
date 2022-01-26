@@ -131,7 +131,7 @@ class Docker_Compose_Generator {
 					'client_host=%s',
 					Command::is_linux() && ! Command::is_wsl() ? '172.17.0.1' : 'host.docker.internal'
 				),
-				'SUBDOMAIN_INSTALL' => '${SUBDOMAIN_INSTALL}',
+				'SUBDOMAIN_INSTALL' => $this->args['subdomain_install'],
 				'PHP_IDE_CONFIG' => "serverName={$this->hostname}",
 				'XDEBUG_SESSION' => $this->hostname,
 				// Set XDebug mode, fall back to "off" to avoid any performance hits.

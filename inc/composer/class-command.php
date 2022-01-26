@@ -658,6 +658,12 @@ EOT;
 	 * @return void
 	 */
 	protected function generate_docker_compose( array $args = [] ) : void {
+		$defaults = [
+			'subdomain_install' => ( $this->get_server_config()['subdomains'] ?? false ) ? 1 : 0
+		];
+
+		$args = array_merge( $args, $defaults );
+
 		$docker_compose = new Docker_Compose_Generator(
 			$this->get_project_name(),
 			$this->get_project_domain(),
@@ -769,7 +775,7 @@ EOT;
 		if ( isset( $server_config['domain'] ) ) {
 			$project_domain = $server_config['domain'];
 		} else {
-			$project_domain = $this->get_project_name();	
+			$project_domain = $this->get_project_name();
 		}
 
 		return preg_replace( '/[^A-Za-z0-9\-\_]/', '', $project_domain );
