@@ -3,6 +3,9 @@
  * Local VIP Composer Command.
  *
  * phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+ * phpcs:disable WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec
+ * phpcs:disable WordPress.PHP.DiscouragedPHPFunctions.system_calls_shell_exec
+ * phpcs:disable WordPress.PHP.DiscouragedPHPFunctions.system_calls_passthru
  *
  * @package humanmade/local-vip
  */
@@ -13,6 +16,7 @@ use Composer\Command\BaseCommand;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Process\Process;
@@ -34,7 +38,7 @@ class Command extends BaseCommand {
 			->setName( 'server' )
 			->setDescription( 'Local Server for VIP Projects' )
 			->setDefinition( [
-				new InputArgument( 'subcommand', null, 'start, stop, restart, cli, exec, shell, status, db, logs.' ),
+				new InputArgument( 'subcommand', null, 'start, stop, restart, cli, exec, shell, status, db, set, logs.' ),
 				new InputArgument( 'options', InputArgument::IS_ARRAY ),
 			] )
 			->setAliases( [ 'local-server', 'local-vip' ] )
@@ -43,13 +47,17 @@ class Command extends BaseCommand {
 Run the local development server.
 
 Default command - start the local development server:
-	start [--xdebug]              passing --xdebug starts the server with xdebug enabled
-Stop the local development server:
-	stop
+	start [--xdebug=<mode>] [--mutagen]
+	                              Passing --xdebug starts the server with xdebug enabled
+	                              optionally set the xdebug mode by assigning a value.
+	                              Passing --mutagen will start the server using Mutagen
+	                              for file sharing.
+Stop the local development server or specific service:
+	stop [<service>] [--clean]                passing --clean will also stop the proxy container
 Restart the local development server:
-	restart [--xdebug]            passing --xdebug restarts the server with xdebug enabled
+	restart [--xdebug=<mode>] [<service>]     passing --xdebug restarts the server with xdebug enabled
 Destroy the local development server:
-	destroy
+	destroy [--clean]                         passing --clean will also destroy the proxy container
 View status of the local development server:
 	status
 Run WP CLI command:
@@ -62,15 +70,29 @@ Database commands:
 	db                            Log into MySQL on the Database server
 	db sequel                     Generates an SPF file for Sequel Pro
 	db info                       Prints out Database connection details
+	db exec -- "<query>"          Run and output the result of a SQL query.
 View the logs
 	logs <service>                <service> can be php, nginx, db, elasticsearch, xray
 EOT
 			)
-			->addOption( 'xdebug' );
+			->addOption( 'xdebug', null, InputOption::VALUE_OPTIONAL, 'Start the server with Xdebug', 'debug' )
+			->addOption( 'mutagen', null, InputOption::VALUE_NONE, 'Start the server with Mutagen file sharing' )
+			->addOption( 'clean', null, InputOption::VALUE_NONE, 'Remove or stop the proxy container when destroying or stopping the server' );
+
+		require getcwd() . '/vendor/autoload.php';
 	}
 
 	/**
-	 * Get the common docker-composer command prefix.
+	 * Whether the command is proxied.
+	 *
+	 * @return boolean
+	 */
+	public function isProxyCommand() {
+		return true;
+	}
+
+	/**
+	 * Get the common docker-compose command prefix.
 	 *
 	 * @return string
 	 */
@@ -92,6 +114,31 @@ EOT
 	 */
 	protected function execute( InputInterface $input, OutputInterface $output ) {
 		$subcommand = $input->getArgument( 'subcommand' );
+
+		// Collect args to pass to the docker compose file generator.
+		$settings = [
+			'xdebug' => 'off',
+			'mutagen' => 'off',
+		];
+
+		// If Xdebug switch is passed add to docker compose args.
+		if ( $input->hasParameterOption( '--xdebug' ) ) {
+			$settings['xdebug'] = $input->getOption( 'xdebug' );
+		}
+
+		// Use mutagen if available.
+		if ( $input->hasParameterOption( '--mutagen' ) ) {
+			if ( $this->is_mutagen_installed() ) {
+				$settings['mutagen'] = 'on';
+			} else {
+				$output->writeln( '<error>Mutagen Beta is not installed.</>' );
+				$output->writeln( '<info>For installation instructions see the Development Channel section here https://mutagen.io/documentation/introduction/installation.</>' );
+				return 1;
+			}
+		}
+
+		// Refresh the docker-compose.yml file.
+		$this->generate_docker_compose( $settings );
 
 		if ( $subcommand === 'start' ) {
 			return $this->start( $input, $output );
@@ -131,9 +178,12 @@ EOT
 		return [
 			'VOLUME' => getcwd(),
 			'COMPOSE_PROJECT_NAME' => $this->get_project_name(),
-			'HTTP_HOST' => $this->get_project_hostname(),
+			'COMPOSE_PROJECT_TLD' => '.local',
+			'DOCKER_CLIENT_TIMEOUT' => 120,
+			'COMPOSE_HTTP_TIMEOUT' => 120,
 			'PATH' => getenv( 'PATH' ),
 			'ES_MEM_LIMIT' => getenv( 'ES_MEM_LIMIT' ) ?: '1g',
+			'HOME' => getenv( 'HOME' ),
 			// Pass subdomain config through to docker, and from there on to PHP.
 			// This is necessary to enable subdomains, because the --subdomains
 			// argument to multisite-install has no effect.
@@ -151,16 +201,22 @@ EOT
 	protected function start( InputInterface $input, OutputInterface $output ) {
 		$output->writeln( '<info>Starting...</>' );
 
-		$env = $this->get_env();
-		if ( $input->getOption( 'xdebug' ) ) {
-			$env['PHP_IMAGE'] = 'humanmade/altis-local-server-php:4.0.0-dev';
-			if ( in_array( php_uname( 's' ), [ 'BSD', 'Linux', 'Solaris', 'Unknown' ], true ) ) {
-				$env['XDEBUG_REMOTE_HOST'] = '172.17.0.1';
-			}
+		$proxy = new Process( $this->get_compose_command( '-f proxy.yml up -d' ), 'vendor/humanmade/local-vip/docker' );
+		$proxy->setTimeout( 0 );
+		$proxy->setTty( posix_isatty( STDOUT ) );
+		$proxy_failed = $proxy->run( function ( $type, $buffer ) {
+			echo $buffer;
+		} );
+
+		if ( $proxy_failed ) {
+			$output->writeln( '<error>Could not start traefik proxy.</>' );
+			return $proxy_failed;
 		}
 
-		$compose = new Process( 'docker-compose up -d', 'vendor/humanmade/local-vip/docker', $env );
-		$compose->setTty( true );
+		$env = $this->get_env();
+
+		$compose = new Process( $this->get_compose_command( 'up -d --remove-orphans', true ), 'vendor/humanmade/local-vip/docker', $env );
+		$compose->setTty( posix_isatty( STDOUT ) );
 		$compose->setTimeout( 0 );
 		$failed = $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
@@ -185,7 +241,7 @@ EOT
 
 		if ( ! $is_installed ) {
 			$server_config = $this->get_server_config();
-			$hostname = $this->get_project_hostname();
+			$hostname = $this->get_project_domain() . '.local';
 
 			$install_failed = $cli->run( new ArrayInput( [
 				'subcommand' => 'cli',
@@ -240,7 +296,7 @@ EOT
 			$output->writeln( '<info>WP Password:</>	<comment>password</>' );
 		}
 
-		$site_url = 'https://' . $this->get_project_hostname();
+		$site_url = 'https://' . $this->get_project_domain() . '.local/';
 		$output->writeln( '<info>Startup completed.</>' );
 		$output->writeln( '<info>To access your site visit:</> <comment>' . $site_url . '</>' );
 
@@ -256,15 +312,34 @@ EOT
 	protected function stop( InputInterface $input, OutputInterface $output ) {
 		$output->writeln( '<info>Stopping...</>' );
 
-		$compose = new Process( 'docker-compose stop', 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$options = $input->getArgument( 'options' );
+		if ( isset( $options[0] ) ) {
+			$service = $options[0];
+		} else {
+			$service = '';
+		}
+
+		$compose = new Process( $this->get_compose_command( "stop $service", true ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$compose->setTimeout( 0 );
+		$compose->setTty( posix_isatty( STDOUT ) );
 		$return_val = $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
 		} );
 
+		if ( $service === '' && $input->hasParameterOption( '--clean' ) ) {
+			$output->writeln( '<info>Stopping proxy container...</>' );
+			$proxy = new Process( $this->get_compose_command( '-f proxy.yml stop' ), 'vendor/humanmade/local-vip/docker' );
+			$proxy->setTimeout( 0 );
+			$proxy->setTty( posix_isatty( STDOUT ) );
+			$proxy->run( function ( $type, $buffer ) {
+				echo $buffer;
+			} );
+		}
+
 		if ( $return_val === 0 ) {
 			$output->writeln( '<info>Stopped.</>' );
 		} else {
-			$output->writeln( '<error>Failed to stop services.</>' );
+			$output->writeln( '<error>Failed to stop service(s).</>' );
 		}
 
 		return $return_val;
@@ -286,10 +361,29 @@ EOT
 
 		$output->writeln( '<error>Destroying...</>' );
 
-		$compose = new Process( 'docker-compose down -v', 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$compose = new Process( $this->get_compose_command( 'down -v --remove-orphans', true ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$compose->setTty( posix_isatty( STDOUT ) );
 		$return_val = $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
 		} );
+
+		// Check whether to remove the proxy container too.
+		$remove_proxy = $input->hasParameterOption( '--clean' );
+		if ( ! $remove_proxy ) {
+			$question = new ConfirmationQuestion( "Do you want to remove the shared proxy container too?\n<comment>Warning:</> Only do this if you have no other instances of Local Server. [y/N] ", false );
+			if ( $helper->ask( $input, $output, $question ) ) {
+				$remove_proxy = true;
+			}
+		}
+
+		if ( $remove_proxy ) {
+			$output->writeln( '<error>Destroying proxy container...</>' );
+			$proxy = new Process( $this->get_compose_command( '-f proxy.yml down -v' ), 'vendor/humanmade/local-vip/docker' );
+			$proxy->setTty( posix_isatty( STDOUT ) );
+			$proxy->run( function ( $type, $buffer ) {
+				echo $buffer;
+			} );
+		}
 
 		if ( $return_val === 0 ) {
 			$output->writeln( '<error>Destroyed.</>' );
@@ -310,13 +404,20 @@ EOT
 	protected function restart( InputInterface $input, OutputInterface $output ) {
 		$output->writeln( '<info>Restarting...</>' );
 
+		$proxy = new Process( $this->get_compose_command( '-f proxy.yml restart' ), 'vendor/humanmade/local-vip/docker' );
+		$proxy->setTty( posix_isatty( STDOUT ) );
+		$proxy->run( function ( $type, $buffer ) {
+			echo $buffer;
+		} );
+
 		$options = $input->getArgument( 'options' );
 		if ( isset( $options[0] ) ) {
 			$service = $options[0];
 		} else {
 			$service = '';
 		}
-		$compose = new Process( "docker-compose restart $service", 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$compose = new Process( $this->get_compose_command( "restart $service", true ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$compose->setTty( posix_isatty( STDOUT ) );
 		$return_val = $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
 		} );
@@ -339,7 +440,7 @@ EOT
 	 * @return int
 	 */
 	protected function exec( InputInterface $input, OutputInterface $output, ?string $program = null ) {
-		$site_url = 'https://' . $this->get_project_hostname();
+		$site_url = 'https://' . $this->get_project_domain() . '.local/';
 		$options = $input->getArgument( 'options' );
 
 		$passed_url = false;
@@ -369,9 +470,10 @@ EOT
 			}
 		}
 
-		$container_id = exec( sprintf( 'docker ps --filter name=%s_php_1 -q', $this->get_project_name() ) );
+		$container_id = exec( sprintf( 'docker ps --filter name=%s-php -q', $this->get_project_name() ) );
 		if ( ! $container_id ) {
 			$output->writeln( '<error>PHP container not found to run command.</>' );
+			$output->writeln( '<info>You may need to run `composer server start` again if you have recently updated Docker.</>' );
 			return 1;
 		}
 
@@ -379,10 +481,16 @@ EOT
 		$lines = exec( 'tput lines' );
 		$has_stdin = ! posix_isatty( STDIN );
 		$has_stdout = ! posix_isatty( STDOUT );
+		if ( self::is_linux() ) {
+			$user = posix_getuid();
+		} else {
+			$user = 'www-data';
+		}
 		$command = sprintf(
-			'docker exec -e COLUMNS=%d -e LINES=%d -u www-data %s %s %s %s',
+			'docker exec -e COLUMNS=%d -e LINES=%d -u %s %s %s %s %s',
 			$columns,
 			$lines,
+			$user,
 			( ! $has_stdin && ! $has_stdout ) && $program === 'wp' ? '-ti' : '', // forward wp-cli's isPiped detection.
 			$container_id,
 			$program ?? '',
@@ -402,7 +510,8 @@ EOT
 	 * @return int
 	 */
 	protected function status( InputInterface $input, OutputInterface $output ) {
-		$compose = new Process( 'docker-compose ps', 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$compose = new Process( $this->get_compose_command( 'ps' ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$compose->setTty( posix_isatty( STDOUT ) );
 		return $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
 		} );
@@ -417,7 +526,8 @@ EOT
 	 */
 	protected function logs( InputInterface $input, OutputInterface $output ) {
 		$log = $input->getArgument( 'options' )[0];
-		$compose = new Process( 'docker-compose logs --tail=100 -f ' . $log, 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$compose = new Process( $this->get_compose_command( 'logs --tail=100 -f ' . $log ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$compose->setTty( posix_isatty( STDOUT ) );
 		$compose->setTimeout( 0 );
 		return $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
@@ -435,10 +545,19 @@ EOT
 		$columns = exec( 'tput cols' );
 		$lines = exec( 'tput lines' );
 		$command_prefix = $this->get_base_command_prefix();
+
+		$php_container_id = shell_exec( sprintf(
+			'%s %s',
+			$command_prefix,
+			$this->get_compose_command( 'ps -q php' )
+		) );
+
 		passthru( sprintf(
-			"$command_prefix docker-compose exec -e COLUMNS=%d -e LINES=%d php /bin/bash",
+			"$command_prefix %s exec -it -e COLUMNS=%d -e LINES=%d %s /bin/bash",
+			'docker',
 			$columns,
-			$lines
+			$lines,
+			trim( $php_container_id )
 		), $return_val );
 
 		return $return_val;
@@ -456,12 +575,12 @@ EOT
 		$columns = exec( 'tput cols' );
 		$lines = exec( 'tput lines' );
 
-		$base_command_prefix = $this->get_base_command_prefix();
-
 		$base_command = sprintf(
-			"$base_command_prefix docker-compose exec -e COLUMNS=%d -e LINES=%d db",
+			// phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
+			'docker exec -it -u root -e COLUMNS=%d -e LINES=%d -e MYSQL_PWD=wordpress %s-db',
 			$columns,
-			$lines
+			$lines,
+			$this->get_project_name()
 		);
 
 		$return_val = 0;
@@ -480,7 +599,8 @@ EOT
 <info>Host</info>:           ${connection_data['HOST']}
 <info>Port</info>:           ${connection_data['PORT']}
 
-<comment>Version</comment>:        ${connection_data['MARIADB_VERSION']}
+<comment>Version</comment>:        ${connection_data['MYSQL_MAJOR']}
+<comment>MySQL link</comment>:     mysql://${connection_data['MYSQL_USER']}:${connection_data['MYSQL_PASSWORD']}@${connection_data['HOST']}:${connection_data['PORT']}/${connection_data['MYSQL_DATABASE']}
 
 EOT;
 				$output->write( $db_info );
@@ -507,9 +627,21 @@ EOT;
 				}
 
 				break;
+			case 'exec':
+				$query = $input->getArgument( 'options' )[1] ?? null;
+				if ( empty( $query ) ) {
+					$output->writeln( '<error>No query specified: pass a query via `db exec -- "sql query..."`</error>' );
+					break;
+				}
+				if ( substr( $query, -1 ) !== ';' ) {
+					$query = "$query;";
+				}
+				// phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
+				passthru( "$base_command mysql --database=wordpress --user=root -e \"$query\"", $return_val );
+				break;
 			case null:
 				// phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
-				passthru( "$base_command mysql --database=wordpress --user=root -pwordpress", $return_val );
+				passthru( "$base_command mysql --database=wordpress --user=root", $return_val );
 				break;
 			default:
 				$output->writeln( "<error>The subcommand $db is not recognized</error>" );
@@ -517,6 +649,32 @@ EOT;
 		}
 
 		return $return_val;
+	}
+
+	/**
+	 * Generates the docker-compose.yml file.
+	 *
+	 * @param array $args An optional array of arguments to pass through to the generator.
+	 * @return void
+	 */
+	protected function generate_docker_compose( array $args = [] ) : void {
+		$defaults = [
+			'subdomain_install' => ( $this->get_server_config()['subdomains'] ?? false ) ? 1 : 0
+		];
+
+		$args = array_merge( $args, $defaults );
+
+		$docker_compose = new Docker_Compose_Generator(
+			$this->get_project_name(),
+			$this->get_project_domain(),
+			getcwd(),
+			$args
+		);
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
+		file_put_contents(
+			getcwd() . DIRECTORY_SEPARATOR . 'vendor/humanmade/local-vip/docker' . DIRECTORY_SEPARATOR . 'docker-compose.yml',
+			$docker_compose->get_yaml()
+		);
 	}
 
 	/**
@@ -530,7 +688,8 @@ EOT;
 		$lines = exec( 'tput lines' );
 
 		$base_command = sprintf(
-			"$command_prefix docker-compose exec -e COLUMNS=%d -e LINES=%d db",
+			"$command_prefix %s exec -e COLUMNS=%d -e LINES=%d -T db",
+			$this->get_compose_command(),
 			$columns,
 			$lines
 		);
@@ -548,18 +707,22 @@ EOT;
 			'MYSQL_PASSWORD',
 			'MYSQL_USER',
 			'MYSQL_DATABASE',
-			'MYSQL_VERSION',
+			'MYSQL_MAJOR',
 		];
 
 		array_walk( $values, function ( $value, $key ) use ( $keys ) {
 			return in_array( $key, $keys, true ) ? $value : false;
 		} );
 
-		$db_container_id = shell_exec( "$command_prefix docker-compose ps -q db" );
+		$db_container_id = shell_exec( sprintf(
+			'%s %s',
+			$command_prefix,
+			$this->get_compose_command( 'ps -q db' )
+		) );
 
 		// Retrieve the forwarded ports using Docker and the container ID.
 		$ports = shell_exec( sprintf( "$command_prefix docker ps --format '{{.Ports}}' --filter id=%s", $db_container_id ) );
-		preg_match( '/([\d.]+):([\d]+)->.*/', $ports, $ports_matches );
+		preg_match( '/([\d.]+):([\d]+)->.*/', trim( $ports ), $ports_matches );
 
 		return array_merge(
 			array_filter( $values ),
@@ -602,18 +765,95 @@ EOT;
 	}
 
 	/**
-	 * Get the full hostname of the project
+	 * Get the name of the project for the local domain
 	 *
 	 * @return string
 	 */
-	protected function get_project_hostname() : string {
+	protected function get_project_domain() : string {
 		$server_config = $this->get_server_config();
 
-		if ( isset( $server_config['host'] ) ) {
-			return preg_replace( '/[^A-Za-z0-9\-\_.]/', '', $server_config['host'] );
+		if ( isset( $server_config['domain'] ) ) {
+			$project_domain = $server_config['domain'];
+		} else {
+			$project_domain = $this->get_project_name();
 		}
 
-		// Use {configured project name or project directory name}.local as fallback.
-		return $this->get_project_name() . '.local';
+		return preg_replace( '/[^A-Za-z0-9\-\_]/', '', $project_domain );
 	}
+
+	/**
+	 * Check if the current host operating system is Linux based.
+	 *
+	 * @return boolean
+	 */
+	public static function is_linux() : bool {
+		return in_array( php_uname( 's' ), [ 'BSD', 'Linux', 'Solaris', 'Unknown' ], true );
+	}
+
+	/**
+	 * Check if the current host operating system is Mac OS.
+	 *
+	 * @return boolean
+	 */
+	public static function is_macos() : bool {
+		return php_uname( 's' ) === 'Darwin';
+	}
+
+	/**
+	 * Check if the current host is Windows.
+	 *
+	 * @return boolean
+	 */
+	public static function is_windows() : bool {
+		return php_uname( 's' ) === 'Windows';
+	}
+
+	/**
+	 * Check if the current host is WSL.
+	 *
+	 * @return boolean
+	 */
+	public static function is_wsl() : bool {
+		return getenv( 'WSL_INTEROP' ) !== false;
+	}
+
+	/**
+	 * Check if Mutagen is installed.
+	 *
+	 * @return boolean
+	 */
+	protected function is_mutagen_installed() : bool {
+		static $is_installed;
+		if ( $is_installed !== null ) {
+			return $is_installed;
+		}
+		if ( self::is_linux() || self::is_macos() ) {
+			$is_installed = ! empty( shell_exec( 'which mutagen' ) );
+		} else {
+			$is_installed = ! empty( shell_exec( 'where mutagen' ) );
+		}
+		return $is_installed;
+	}
+
+	/**
+	 * Get the docker compose command to use.
+	 *
+	 * If Mutagen is active it is used for file sharing by default.
+	 *
+	 * @param string $command The command to append to the root compose command.
+	 * @param bool $mutagen Whether to use Mutagen's compose wrapper.
+	 * @return string
+	 */
+	protected function get_compose_command( string $command = '', bool $mutagen = false ) : string {
+		static $default_command;
+		if ( empty( $default_command ) ) {
+			exec( 'docker compose', $output );
+			$default_command = strpos( implode( "\n", $output ), 'Usage:  docker compose' ) !== false ? 'docker compose' : 'docker-compose';
+		}
+		return sprintf( '%s %s',
+			$this->is_mutagen_installed() && $mutagen ? 'mutagen compose' : $default_command,
+			$command
+		);
+	}
+
 }

@@ -3,3 +3,8 @@ node_modules
 # In case an install is run locally
 composer.lock
 vendor
+
+# This mustn't be committed
+docker/docker-compose.yml
+
+/*.crt

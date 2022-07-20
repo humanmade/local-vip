@@ -15,6 +15,11 @@ function bootstrap() {
 	add_filter( 'local_vip/http_host', __NAMESPACE__ . '\\Cron\\apply_cron_hostname', 1, 1 );
 	add_filter( 'local_vip/http_host', __NAMESPACE__ . '\\apply_env_hostname', 11, 1 );
 	add_filter( 'local_vip/http_host', __NAMESPACE__ . '\\apply_default_hostname', 20, 1 );
+
+	if ( empty( $_SERVER['HTTP_HOST'] ) ) {
+		$_SERVER['HTTP_HOST'] = getenv( 'COMPOSE_PROJECT_NAME' );
+	}
+
 	$_SERVER['HTTP_HOST'] = apply_filters( 'local_vip/http_host', $_SERVER['HTTP_HOST'] );
 
 	// Use logic borrowed from altis/cms to determine if we should set the
@@ -84,7 +89,7 @@ function apply_default_hostname( $hostname ) {
 	if ( empty( $hostname ) ) {
 		$project_name = getenv( 'COMPOSE_PROJECT_NAME' );
 		if ( ! empty( $project_name ) ) {
-			return $project_name . '.local';
+			return $project_name;
 		}
 	}
 	return $hostname;
