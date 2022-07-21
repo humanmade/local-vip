@@ -202,7 +202,7 @@ EOT
 	protected function start( InputInterface $input, OutputInterface $output ) {
 		$output->writeln( '<info>Starting...</>' );
 
-		$proxy = new Process( $this->get_compose_command( '-f proxy.yml up -d' ), 'vendor/humanmade/local-vip/docker' );
+		$proxy = $this->process( $this->get_compose_command( '-f proxy.yml up -d' ), 'vendor/humanmade/local-vip/docker' );
 		$proxy->setTimeout( 0 );
 		$proxy->setTty( posix_isatty( STDOUT ) );
 		$proxy_failed = $proxy->run( function ( $type, $buffer ) {
@@ -216,7 +216,7 @@ EOT
 
 		$env = $this->get_env();
 
-		$compose = new Process( $this->get_compose_command( 'up -d --remove-orphans', true ), 'vendor/humanmade/local-vip/docker', $env );
+		$compose = $this->process( $this->get_compose_command( 'up -d --remove-orphans', true ), 'vendor/humanmade/local-vip/docker', $env );
 		$compose->setTty( posix_isatty( STDOUT ) );
 		$compose->setTimeout( 0 );
 		$failed = $compose->run( function ( $type, $buffer ) {
@@ -320,7 +320,7 @@ EOT
 			$service = '';
 		}
 
-		$compose = new Process( $this->get_compose_command( "stop $service", true ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$compose = $this->process( $this->get_compose_command( "stop $service", true ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		$compose->setTimeout( 0 );
 		$compose->setTty( posix_isatty( STDOUT ) );
 		$return_val = $compose->run( function ( $type, $buffer ) {
@@ -329,7 +329,7 @@ EOT
 
 		if ( $service === '' && $input->hasParameterOption( '--clean' ) ) {
 			$output->writeln( '<info>Stopping proxy container...</>' );
-			$proxy = new Process( $this->get_compose_command( '-f proxy.yml stop' ), 'vendor/humanmade/local-vip/docker' );
+			$proxy = $this->process( $this->get_compose_command( '-f proxy.yml stop' ), 'vendor/humanmade/local-vip/docker' );
 			$proxy->setTimeout( 0 );
 			$proxy->setTty( posix_isatty( STDOUT ) );
 			$proxy->run( function ( $type, $buffer ) {
@@ -362,7 +362,7 @@ EOT
 
 		$output->writeln( '<error>Destroying...</>' );
 
-		$compose = new Process( $this->get_compose_command( 'down -v --remove-orphans', true ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$compose = $this->process( $this->get_compose_command( 'down -v --remove-orphans', true ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		$compose->setTty( posix_isatty( STDOUT ) );
 		$return_val = $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
@@ -379,7 +379,7 @@ EOT
 
 		if ( $remove_proxy ) {
 			$output->writeln( '<error>Destroying proxy container...</>' );
-			$proxy = new Process( $this->get_compose_command( '-f proxy.yml down -v' ), 'vendor/humanmade/local-vip/docker' );
+			$proxy = $this->process( $this->get_compose_command( '-f proxy.yml down -v' ), 'vendor/humanmade/local-vip/docker' );
 			$proxy->setTty( posix_isatty( STDOUT ) );
 			$proxy->run( function ( $type, $buffer ) {
 				echo $buffer;
@@ -405,7 +405,7 @@ EOT
 	protected function restart( InputInterface $input, OutputInterface $output ) {
 		$output->writeln( '<info>Restarting...</>' );
 
-		$proxy = new Process( $this->get_compose_command( '-f proxy.yml restart' ), 'vendor/humanmade/local-vip/docker' );
+		$proxy = $this->process( $this->get_compose_command( '-f proxy.yml restart' ), 'vendor/humanmade/local-vip/docker' );
 		$proxy->setTty( posix_isatty( STDOUT ) );
 		$proxy->run( function ( $type, $buffer ) {
 			echo $buffer;
@@ -417,7 +417,7 @@ EOT
 		} else {
 			$service = '';
 		}
-		$compose = new Process( $this->get_compose_command( "restart $service", true ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$compose = $this->process( $this->get_compose_command( "restart $service", true ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		$compose->setTty( posix_isatty( STDOUT ) );
 		$return_val = $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
@@ -511,7 +511,7 @@ EOT
 	 * @return int
 	 */
 	protected function status( InputInterface $input, OutputInterface $output ) {
-		$compose = new Process( $this->get_compose_command( 'ps' ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$compose = $this->process( $this->get_compose_command( 'ps' ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		$compose->setTty( posix_isatty( STDOUT ) );
 		return $compose->run( function ( $type, $buffer ) {
 			echo $buffer;
@@ -527,7 +527,7 @@ EOT
 	 */
 	protected function logs( InputInterface $input, OutputInterface $output ) {
 		$log = $input->getArgument( 'options' )[0];
-		$compose = new Process( $this->get_compose_command( 'logs --tail=100 -f ' . $log ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
+		$compose = $this->process( $this->get_compose_command( 'logs --tail=100 -f ' . $log ), 'vendor/humanmade/local-vip/docker', $this->get_env() );
 		$compose->setTty( posix_isatty( STDOUT ) );
 		$compose->setTimeout( 0 );
 		return $compose->run( function ( $type, $buffer ) {
