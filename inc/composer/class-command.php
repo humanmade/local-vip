@@ -13,6 +13,7 @@
 namespace HM\Local_VIP\Composer;
 
 use Composer\Command\BaseCommand;
+use Composer\Composer;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -779,6 +780,23 @@ EOT;
 		}
 
 		return preg_replace( '/[^A-Za-z0-9\-\_]/', '', $project_domain );
+	}
+	/**
+	 * Run a prepared process command for various versions of Symfony Console.
+	 *
+	 * Console v5+ requires an array for the command.
+	 * Console v1-3 only supports strings.
+	 *
+	 * @param mixed ...$args Args to pass to Process.
+	 * @return Process
+	 */
+	protected function process( ...$args ) : Process {
+		if ( version_compare( Composer::getVersion(), '2.3', '>=' ) && ! is_array( $args[0] ) ) {
+			$args[0] = explode( ' ', $args[0] );
+			$args[0] = array_filter( $args[0] );
+		}
+
+		return new Process( ...$args );
 	}
 
 	/**
