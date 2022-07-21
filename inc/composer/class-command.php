@@ -197,7 +197,7 @@ EOT
 	 *
 	 * @param InputInterface $input Command input object.
 	 * @param OutputInterface $output Command output object.
-	 * @return int|null
+	 * @return int
 	 */
 	protected function start( InputInterface $input, OutputInterface $output ) {
 		$output->writeln( '<info>Starting...</>' );
@@ -301,6 +301,8 @@ EOT
 		$output->writeln( '<info>Startup completed.</>' );
 		$output->writeln( '<info>To access your site visit:</> <comment>' . $site_url . '</>' );
 
+		// Symfony complains if we don't return an integer.
+		return 0;
 	}
 
 	/**
