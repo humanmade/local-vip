@@ -1,3 +1,11 @@
+# THIS BRANCH IS A PLACEHOLDER
+
+**It is just a dupe of composer-2 until that branch is merged into main and the 2.0 release is released.**
+
+It exists because certain client projects rely on it; **If you are not one of those projects, do not use this branch!** Use `composer-2` or the 2.0 release (if it exists) instead.
+
+---
+
 <h1 align="center">Local Server for VIP</h1>
 
 <p align="center">A local development environment for WordPress VIP projects, built on Docker.</p>
