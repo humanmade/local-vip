@@ -17,7 +17,7 @@ function bootstrap() {
 	add_filter( 'local_vip/http_host', __NAMESPACE__ . '\\apply_default_hostname', 20, 1 );
 
 	if ( empty( $_SERVER['HTTP_HOST'] ) ) {
-		$_SERVER['HTTP_HOST'] = getenv( 'COMPOSE_PROJECT_NAME' );
+		$_SERVER['HTTP_HOST'] = getenv( 'COMPOSE_PROJECT_NAME' ) . '.' . getenv( 'COMPOSE_PROJECT_TLD' );
 	}
 
 	$_SERVER['HTTP_HOST'] = apply_filters( 'local_vip/http_host', $_SERVER['HTTP_HOST'] );
