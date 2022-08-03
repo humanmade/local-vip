@@ -908,11 +908,14 @@ EOT;
 
 		$hostname = $this->get_project_tld();
 		$extra_domains = $config['domains'] ?? [];
+		$sites = array_map( function ( $subdomain ) use ( $hostname ) {
+			return "$subdomain.$hostname";
+		}, array_keys( $config['sites'] ?? [] ) );
 
 		$domains = array_merge( [
 			$hostname,
 			"elasticsearch-$hostname",
-		], $extra_domains );
+		], $extra_domains, $sites );
 
 		$failed = [];
 		foreach ( $domains as $domain ) {
