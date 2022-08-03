@@ -212,7 +212,7 @@ EOT
 
 		// Check for changed project name.
 		$tld = $this->get_project_tld();
-		$name = $this->get_project_subdomain();
+		$name = $this->get_project_name();
 		$host = @file_get_contents( 'vendor/host' );
 		$is_new_host = $host && ( $host !== "$name.$tld" );
 
@@ -810,22 +810,13 @@ EOT;
 				$config = $this->get_composer_config();
 
 				$tld = $this->get_project_tld();
-				$subdomain = $this->get_project_subdomain();
-				$hostname = $subdomain . '.' . $tld;
 				$domains = explode( ' ', $input->getArgument( 'options' )[1] ?? '' );
 				$extra_domains = $config['domains'] ?? [];
 
-				if ( false !== strpos( $tld, '.' ) ) {
-					$domains[] = $tld;
-					$domains[] = '*.' . $tld;
-					$domains[] = '*.' . $hostname;
-				} else {
-					$domains[] = $hostname;
-					$domains[] = "*.$hostname";
-					$domains[] = "elasticsearch-$hostname";
-				}
+				$domains[] = $tld;
+				$domains[] = '*.' . $tld;
 
-				$domains = array_merge( [ '*.vip.local' ], $domains, $extra_domains );
+				$domains = array_merge( $domains, [ '*.vip.local' ], $extra_domains );
 
 				$cert_domains = implode( ' ', array_filter( array_unique( $domains ) ) );
 
@@ -915,7 +906,7 @@ EOT;
 	protected function check_host_entries( InputInterface $input, OutputInterface $output ) : void {
 		$config = $this->get_composer_config();
 
-		$hostname = ( $config['name'] ?? $this->get_project_subdomain() ) . '.' . ( $config['tld'] ?? $this->get_project_tld() );
+		$hostname = $this->get_project_tld();
 		$extra_domains = $config['domains'] ?? [];
 
 		$domains = array_merge( [
@@ -1063,7 +1054,7 @@ EOT;
 		$server_config = $this->get_server_config();
 
 		if ( isset( $server_config['domain'] ) ) {
-			$project_domain = $server_config['domain'];
+			$project_domain = strtok( $server_config['domain'], '.' );
 		} else {
 			$project_domain = $this->get_project_name();
 		}
@@ -1092,8 +1083,8 @@ EOT;
 	protected function get_project_tld() : string {
 		$config = $this->get_composer_config();
 
-		if ( isset( $config['tld'] ) ) {
-			$project_name = $config['tld'];
+		if ( isset( $config['domain'] ) ) {
+			$project_name = $config['domain'];
 		} else {
 			$project_name = 'vip.local';
 		}
@@ -1106,31 +1097,12 @@ EOT;
 	 *
 	 * @return string
 	 */
-	protected function get_project_subdomain() : string {
-		$config = $this->get_composer_config();
-
-		if ( isset( $config['name'] ) ) {
-			$project_name = $config['name'];
-		} else {
-			$project_name = basename( getcwd() );
-		}
-
-		return preg_replace( '/[^A-Za-z0-9\-\_]/', '', $project_name );
-	}
-
-	/**
-	 * Get the name of the project for the local subdomain
-	 *
-	 * @return string
-	 */
 	protected function get_project_url() : string {
 		$is_secure = $this->get_composer_config()['secure'] ?? true;
-		$tld = $this->get_project_tld();
 		$site_url = sprintf(
-			'http%s://%s%s/',
+			'http%s://%s/',
 			$is_secure ? 's' : '',
-			$this->get_project_subdomain(),
-			$tld ? '.' . $tld : ''
+			$this->get_project_tld()
 		);
 		return $site_url;
 	}

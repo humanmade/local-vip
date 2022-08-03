@@ -69,7 +69,7 @@ class Docker_Compose_Generator {
 		$this->project_name = $project_name;
 		$this->root_dir = $root_dir;
 		$this->tld = $tld;
-		$this->hostname = $domain_name . '.' . $this->tld;
+		$this->hostname = $this->tld;
 		$this->config_dir = dirname( __DIR__, 2 ) . '/docker';
 		$this->args = $args;
 	}
@@ -302,7 +302,7 @@ class Docker_Compose_Generator {
 				'mem_limit' => $mem_limit,
 				'volumes' => [
 					'es-data:/usr/share/elasticsearch/data',
-					"{$this->root_dir}/content/uploads/es-packages:/usr/share/elasticsearch/config/packages",
+					"{$this->root_dir}/wp-content/uploads/es-packages:/usr/share/elasticsearch/config/packages",
 				],
 				'ports' => [
 					'9200',
