@@ -62,14 +62,15 @@ class Docker_Compose_Generator {
 	 * @param string $project_name The docker compose project name.
 	 * @param string $domain_name The docker compose domain name.
 	 * @param string $root_dir The project root directory.
+	 * @param string $tld The primary top level domain for the server.
 	 * @param array $args An optional array of arguments to modify the behaviour of the generator.
 	 */
-	public function __construct( string $project_name, string $domain_name, string $root_dir, array $args = [] ) {
+	public function __construct( string $project_name, string $domain_name, string $root_dir, string $tld = 'vip.local', array $args = [] ) {
 		$this->project_name = $project_name;
 		$this->root_dir = $root_dir;
+		$this->tld = $tld;
+		$this->hostname = $this->tld;
 		$this->config_dir = dirname( __DIR__, 2 ) . '/docker';
-		$this->tld = 'local';
-		$this->hostname = $domain_name . '.' . $this->tld;
 		$this->args = $args;
 	}
 
@@ -175,6 +176,10 @@ class Docker_Compose_Generator {
 	 * @return array
 	 */
 	protected function get_service_nginx() : array {
+		$config = $this->get_config();
+		$domains = $config['domains'] ?? [];
+		$domains = $domains ? ',' . implode( ',', $domains ) : '';
+
 		return [
 			'nginx' => [
 				'image' => 'humanmade/altis-local-server-nginx:3.4.0',
@@ -198,7 +203,8 @@ class Docker_Compose_Generator {
 					'traefik.port=8080',
 					'traefik.protocol=https',
 					'traefik.docker.network=proxy',
-					"traefik.frontend.rule=HostRegexp:{$this->hostname},{subdomain:[a-z.-_]+}.{$this->hostname}",
+					"traefik.frontend.rule=HostRegexp:{$this->hostname},{subdomain:[a-z.-_]+}.{$this->hostname}{$domains}",
+					"traefik.domain={$this->hostname},*.{$this->hostname}{$domains}",
 				],
 				'environment' => [
 					// Gzip compression now defaults to off to support Brotli compression via CloudFront.
@@ -300,7 +306,7 @@ class Docker_Compose_Generator {
 				'mem_limit' => $mem_limit,
 				'volumes' => [
 					'es-data:/usr/share/elasticsearch/data',
-					"{$this->root_dir}/content/uploads/es-packages:/usr/share/elasticsearch/config/packages",
+					"{$this->root_dir}/wp-content/uploads/es-packages:/usr/share/elasticsearch/config/packages",
 				],
 				'ports' => [
 					'9200',
@@ -323,6 +329,7 @@ class Docker_Compose_Generator {
 					'traefik.protocol=http',
 					'traefik.docker.network=proxy',
 					"traefik.frontend.rule=HostRegexp:elasticsearch-{$this->hostname}",
+					"traefik.domain=elasticsearch-{$this->hostname}",
 				],
 				'environment' => [
 					'http.max_content_length=10mb',
