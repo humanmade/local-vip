@@ -29,8 +29,11 @@ function bootstrap() {
 	} else if ( is_subdomain_install() ) {
 		define( 'SUBDOMAIN_INSTALL', 1 );
 
-		// Configure PECL Memcached integration to load on a very early hook.
-		add_action( 'enable_wp_debug_mode_checks', __NAMESPACE__ . '\\load_object_cache_memcached' );
+		// Some environments may use Redis instead, so load Memcached conditionally.
+		if ( class_exists( 'Memcached' ) ) {
+			// Configure PECL Memcached integration to load on a very early hook.
+			add_action( 'enable_wp_debug_mode_checks', __NAMESPACE__ . '\\load_object_cache_memcached' );
+		}
 	}
 
 	defined( 'DB_HOST' ) or define( 'DB_HOST', getenv( 'DB_HOST' ) );

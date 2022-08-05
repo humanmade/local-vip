@@ -81,7 +81,7 @@ class Docker_Compose_Generator {
 	 */
 	protected function get_php_reusable() : array {
 		$version_map = [
-			'8.0' => 'humanmade/altis-local-server-php:5.0.0-beta.1',
+			'8.0' => 'humanmade/altis-local-server-php:5.0.0',
 			'7.4' => 'humanmade/altis-local-server-php:4.2.0',
 		];
 
@@ -165,6 +165,14 @@ class Docker_Compose_Generator {
 				'FILES_CLIENT_SITE_ID' => '123',
 			],
 		];
+
+		if ($image !== 'humanmade/altis-local-server-php:4.2.0') {
+			// Other images remove support for memcache.
+			unset($services['depends_on']['memcached']);
+			$services['depends_on']['redis'] = [
+				'condition' => 'service_started',
+			];
+		}
 
 		if ( $this->get_config()['elasticsearch'] ) {
 			$services['depends_on']['elasticsearch'] = [
@@ -289,6 +297,23 @@ class Docker_Compose_Generator {
 				'image' => 'memcached',
 				'container_name' => "{$this->project_name}-memcached",
 				'restart' => 'always',
+			],
+		];
+	}
+
+	/**
+	 * Get the Redis service.
+	 *
+	 * @return array
+	 */
+	protected function get_service_redis() : array {
+		return [
+			'redis' => [
+				'image' => 'redis:3.2-alpine',
+				'container_name' => "{$this->project_name}-redis",
+				'ports' => [
+					'6379',
+				],
 			],
 		];
 	}
@@ -476,10 +501,13 @@ class Docker_Compose_Generator {
 	 * @return array
 	 */
 	public function get_array() : array {
+		$php = $this->get_service_php();
 		$services = array_merge(
 			$this->get_service_db(),
-			$this->get_service_memcached(),
-			$this->get_service_php(),
+			isset( $php['depends_on']['memcached'] )
+				? $this->get_service_memcached()
+				: $this->get_service_redis(),
+			$php,
 			$this->get_service_nginx()
 		);
 
