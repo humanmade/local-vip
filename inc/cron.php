@@ -22,7 +22,7 @@ function filter_cron_url( array $cron_request_array ) {
 	$url = $cron_request_array['url'];
 	$hostname = preg_replace( '#^https?://|/.*$#', '', $url );
 	// The same port appears to be used regardless of protocol.
-	$url = str_replace( "//$hostname", '://nginx:8080', $url );
+	$url = str_replace( "//$hostname", '//nginx:8080', $url );
 
 	// Append a query parameter to detect where the request originated.
 	$url = $url . ( strpos( $url, '?' ) ? '&' : '?' ) . HOST_QUERY_PARAM . '=' . $hostname;
