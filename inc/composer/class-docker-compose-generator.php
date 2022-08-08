@@ -172,6 +172,8 @@ class Docker_Compose_Generator {
 			$services['depends_on']['redis'] = [
 				'condition' => 'service_started',
 			];
+			$services['environment']['REDIS_HOST'] = 'redis';
+			$services['environment']['REDIS_PORT'] = 6379;
 		}
 
 		if ( $this->get_config()['elasticsearch'] ) {
