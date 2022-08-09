@@ -25,6 +25,7 @@ Fill out your project's `composer.json` to define the project name, domain, and 
       "name": "test-vip",
       "domain": "text.local",
       "subdomains": true,
+			"db-image": "biarms/mysql:5.7"
       "sites": {
         "subdomain": "Subsite Name"
       }
