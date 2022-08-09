@@ -39,7 +39,7 @@ Server options can be configured via the `extra.local-vip` section in your compo
 	"extra": {
 		"local-vip": {
 			"name": "my-project",
-			"host": "mycompany.local",
+			"domain": "mycompany.local",
 			"subdomains": true,
 			"sites": {
 				"subsite-slug": "Subsite Title"
@@ -51,8 +51,8 @@ Server options can be configured via the `extra.local-vip` section in your compo
 
 ### Configuration Options
 
-- **name**: The name to use for the Docker containers and the default hostname. Defaults to the name of your project's root folder.
-- **host**: The host name to use for your local site. Defaults to {name}.local.
+- **name**: The name to use for the Docker containers. Defaults to the name of your project's root folder.
+- **domain**: The host name to use for your local site. Defaults to `vip.local` if not set.
 - **subdomains**: Whether to set up new network sites as subdomains. Defaults to false, which causes sites to be created as subdirectories.
 - **sites**: An array or object of sites to create on the network. Either pass an array of subsite slugs, or an object of Title: slug pairs.
 
