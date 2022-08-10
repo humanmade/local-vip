@@ -255,7 +255,7 @@ class Docker_Compose_Generator {
 	protected function get_service_db() : array {
 		return [
 			'db' => [
-				'image' => $this->args['db-image'],
+				'image' => $this->get_config()['db-image'],
 				'container_name' => "{$this->project_name}-db",
 				'volumes' => [
 					'db-data:/var/lib/mysql',
@@ -607,6 +607,7 @@ class Docker_Compose_Generator {
 			'kibana' => true,
 			'xray' => true,
 			'ignore-paths' => [],
+			'db-image' => 'biarms/mysql:5.7',
 		];
 
 		return array_merge( $defaults, $local_server, $local_vip );

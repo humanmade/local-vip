@@ -126,7 +126,6 @@ EOT
 			'xdebug' => 'off',
 			'mutagen' => 'off',
 			'secure' => $this->get_composer_config()['secure'] ?? true,
-			'db-image' => $this->get_composer_config()['db-image'] ?? 'biarms/mysql:5.7',
 		];
 
 		// If Xdebug switch is passed add to docker compose args.
