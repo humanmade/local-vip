@@ -23,7 +23,7 @@ Fill out your project's `composer.json` to define the project name, domain, and 
   "extra": {
     "local-vip": {
       "name": "test-vip",
-      "domain": "text.local",
+      "domain": "test.local",
       "subdomains": true,
       "db-image": "biarms/mysql:5.7"
       "sites": {
