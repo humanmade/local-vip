@@ -542,15 +542,15 @@ class Docker_Compose_Generator {
 	/**
 	 * Get a module config from composer.json.
 	 *
-	 * @param string $module The module to get the config for.
 	 * @return array
 	 */
-	protected function get_config( $module = 'local-server' ) : array {
+	protected function get_config() : array {
 		// @codingStandardsIgnoreLine
 		$json = file_get_contents( $this->root_dir . DIRECTORY_SEPARATOR . 'composer.json' );
 		$composer_json = json_decode( $json, true );
 
-		$config = ( $composer_json['extra']['altis']['modules'][ $module ] ?? [] );
+		$local_server = ( $composer_json['extra']['altis']['modules']['local-server'] ?? [] );
+		$local_vip = ( $composer_json['extra']['local-vip'] ?? [] );
 		$defaults = [
 			'elasticsearch' => '7',
 			'kibana' => true,
@@ -558,7 +558,7 @@ class Docker_Compose_Generator {
 			'ignore-paths' => [],
 		];
 
-		return array_merge( $defaults, $config );
+		return array_merge( $defaults, $local_server, $local_vip );
 	}
 
 	/**
