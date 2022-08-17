@@ -14,7 +14,8 @@
 		"php": ">=7.1",
 		"composer-plugin-api": "^2.0",
 		"humanmade/wordpress-pecl-memcached-object-cache": "^2.1",
-		"symfony/yaml": "~5.3.6"
+		"symfony/yaml": "~5.3.6",
+		"humanmade/wp-redis": "^1.1"
 	},
 	"extra": {
 		"class": "HM\\Local_VIP\\Composer\\Plugin"
