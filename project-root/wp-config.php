@@ -73,9 +73,18 @@ foreach ( $required_constants as $constant ) {
 }
 
 // Set up global to enable the memcached connection.
+// This is only used by PHP 7.4 images.
 global $memcached_servers;
 // "memcached" is the hostname of the relevant network container.
 $memcached_servers = [ [ 'memcached', 11211 ] ];
+
+// Set up global to enable redis connection.
+// This is only used by PHP 8+ images.
+global $redis_server;
+$redis_server = [
+	'host' => getenv( 'REDIS_HOST' ),
+	'port' => getenv( 'REDIS_PORT' ),
+];
 
 // Load VIP configuration and constants.
 if ( is_readable( WP_CONTENT_DIR . '/vip-config/vip-config.php' ) ) {
