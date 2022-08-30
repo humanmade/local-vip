@@ -506,7 +506,7 @@ class Docker_Compose_Generator {
 		$php = $this->get_service_php();
 		$services = array_merge(
 			$this->get_service_db(),
-			isset( $php['depends_on']['memcached'] )
+			isset( $php['php']['depends_on']['memcached'] )
 				? $this->get_service_memcached()
 				: $this->get_service_redis(),
 			$php,
