@@ -81,7 +81,9 @@ class Docker_Compose_Generator {
 	 */
 	protected function get_php_reusable() : array {
 		$version_map = [
-			'8.0' => 'humanmade/altis-local-server-php:5.0.0',
+			'8.2' => 'humanmade/altis-local-server-php:8.2.8',
+			'8.1' => 'humanmade/altis-local-server-php:6.0.10',
+			'8.0' => 'humanmade/altis-local-server-php:5.0.10',
 			'7.4' => 'humanmade/altis-local-server-php:4.2.0',
 		];
 
