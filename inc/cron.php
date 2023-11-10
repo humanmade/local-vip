@@ -15,14 +15,14 @@ const HOST_QUERY_PARAM = 'docker_cron_hostname';
  * container, where the nginx container is exposed as nginx:{port}.
  *
  * @param array $cron_request_array An array of cron request URL arguments.
- * @return void
+ * @return array
  */
 function filter_cron_url( array $cron_request_array ) {
 	// Re-point requests to {hostname} to target the nginx docker container.
 	$url = $cron_request_array['url'];
 	$hostname = preg_replace( '#^https?://|/.*$#', '', $url );
-	$url = str_replace( "https://$hostname", 'https://nginx:8443/wordpress', $url );
-	$url = str_replace( "http://$hostname", 'http://nginx:8080/wordpress', $url );
+	// The same port appears to be used regardless of protocol.
+	$url = str_replace( "//$hostname", '//nginx:8080', $url );
 
 	// Append a query parameter to detect where the request originated.
 	$url = $url . ( strpos( $url, '?' ) ? '&' : '?' ) . HOST_QUERY_PARAM . '=' . $hostname;

@@ -1,7 +1,7 @@
 {
 	"name": "humanmade/local-vip",
 	"description": "Local Server module for WordPress VIP projects",
-	"version": "1.3.3",
+	"version": "1.4.0",
 	"type": "composer-plugin",
 	"license": "GPL-2.0-or-later",
 	"authors": [
@@ -12,8 +12,10 @@
 	],
 	"require": {
 		"php": ">=7.1",
-		"composer-plugin-api": "^1.1",
-		"humanmade/wordpress-pecl-memcached-object-cache": "^2.1"
+		"composer-plugin-api": "^2.0",
+		"humanmade/wordpress-pecl-memcached-object-cache": "^2.1",
+		"symfony/yaml": "~5.3.6",
+		"humanmade/wp-redis": "^1.1"
 	},
 	"extra": {
 		"class": "HM\\Local_VIP\\Composer\\Plugin"
