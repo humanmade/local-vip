@@ -80,6 +80,29 @@ class Docker_Compose_Generator {
 	 * @return array
 	 */
 	protected function get_php_reusable() : array {
+		$version_map = [
+			'8.2' => 'humanmade/altis-local-server-php:8.2.8',
+			'8.1' => 'humanmade/altis-local-server-php:6.0.10',
+			'8.0' => 'humanmade/altis-local-server-php:5.0.10',
+			'7.4' => 'humanmade/altis-local-server-php:4.2.0',
+		];
+
+		$versions = array_keys( $version_map );
+		$version = (string) $this->get_config()['php'];
+
+		if ( ! in_array( $version, $versions, true ) ) {
+			echo sprintf(
+				"The configured PHP version \"%s\" is not supported.\nTry one of the following:\n  - %s\n",
+				// phpcs:ignore HM.Security.EscapeOutput.OutputNotEscaped
+				$version,
+				// phpcs:ignore HM.Security.EscapeOutput.OutputNotEscaped
+				implode( "\n  - ", $versions )
+			);
+			exit( 1 );
+		}
+
+		$image = $version_map[ $version ];
+
 		$services = [
 			'init' => true,
 			'depends_on' => [
@@ -93,7 +116,7 @@ class Docker_Compose_Generator {
 					'condition' => 'service_started',
 				],
 			],
-			'image' => 'humanmade/altis-local-server-php:4.2.0',
+			'image' => $image,
 			'links' => [
 				'db:db-read-replica',
 			],
@@ -144,6 +167,16 @@ class Docker_Compose_Generator {
 				'FILES_CLIENT_SITE_ID' => '123',
 			],
 		];
+
+		if ($image !== 'humanmade/altis-local-server-php:4.2.0') {
+			// Other images remove support for memcache.
+			unset($services['depends_on']['memcached']);
+			$services['depends_on']['redis'] = [
+				'condition' => 'service_started',
+			];
+			$services['environment']['REDIS_HOST'] = 'redis';
+			$services['environment']['REDIS_PORT'] = 6379;
+		}
 
 		if ( $this->get_config()['elasticsearch'] ) {
 			$services['depends_on']['elasticsearch'] = [
@@ -224,7 +257,7 @@ class Docker_Compose_Generator {
 	protected function get_service_db() : array {
 		return [
 			'db' => [
-				'image' => 'biarms/mysql:5.7',
+				'image' => $this->get_config()['db-image'],
 				'container_name' => "{$this->project_name}-db",
 				'volumes' => [
 					'db-data:/var/lib/mysql',
@@ -268,6 +301,23 @@ class Docker_Compose_Generator {
 				'image' => 'memcached',
 				'container_name' => "{$this->project_name}-memcached",
 				'restart' => 'always',
+			],
+		];
+	}
+
+	/**
+	 * Get the Redis service.
+	 *
+	 * @return array
+	 */
+	protected function get_service_redis() : array {
+		return [
+			'redis' => [
+				'image' => 'redis:3.2-alpine',
+				'container_name' => "{$this->project_name}-redis",
+				'ports' => [
+					'6379',
+				],
 			],
 		];
 	}
@@ -455,10 +505,13 @@ class Docker_Compose_Generator {
 	 * @return array
 	 */
 	public function get_array() : array {
+		$php = $this->get_service_php();
 		$services = array_merge(
 			$this->get_service_db(),
-			$this->get_service_memcached(),
-			$this->get_service_php(),
+			isset( $php['php']['depends_on']['memcached'] )
+				? $this->get_service_memcached()
+				: $this->get_service_redis(),
+			$php,
 			$this->get_service_nginx()
 		);
 
@@ -556,6 +609,7 @@ class Docker_Compose_Generator {
 			'kibana' => true,
 			'xray' => true,
 			'ignore-paths' => [],
+			'db-image' => 'biarms/mysql:5.7',
 		];
 
 		return array_merge( $defaults, $local_server, $local_vip );
